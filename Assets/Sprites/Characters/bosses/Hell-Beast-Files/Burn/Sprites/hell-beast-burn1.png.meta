@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      hell-beast-burn1_0: -8533478080460743615
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

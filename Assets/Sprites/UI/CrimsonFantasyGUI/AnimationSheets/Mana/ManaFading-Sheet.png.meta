@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      ManaFading-Sheet_0: 5822567628292900660
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

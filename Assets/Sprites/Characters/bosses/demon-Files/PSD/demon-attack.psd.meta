@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      demon-attack_0: 4830101959132194629
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

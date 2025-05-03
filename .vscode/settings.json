@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Solipsia-Desenvolvimento.sln"
+    "dotnet.defaultSolution": "Solipsia-Desenvolvimento-main.sln"
 }

@@ -272,7 +272,13 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      GenericSparks-Sheet_0: 5065078324826823668
+      GenericSparks-Sheet_1: 6341949829618323290
+      GenericSparks-Sheet_2: 427969208370117144
+      GenericSparks-Sheet_3: 5791309744389488855
+      GenericSparks-Sheet_4: 5490727996153601904
+      GenericSparks-Sheet_5: -8146657596815206606
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

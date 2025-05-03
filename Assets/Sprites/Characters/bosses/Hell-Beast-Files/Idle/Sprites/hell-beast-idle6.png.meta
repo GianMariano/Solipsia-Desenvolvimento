@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      hell-beast-idle6_0: -3599889962189975406
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

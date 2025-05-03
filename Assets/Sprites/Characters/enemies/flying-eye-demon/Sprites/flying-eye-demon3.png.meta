@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      flying-eye-demon3_0: 153208505713805760
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

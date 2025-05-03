@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      LifeHealing-Sheet_0: 7621811115366677154
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

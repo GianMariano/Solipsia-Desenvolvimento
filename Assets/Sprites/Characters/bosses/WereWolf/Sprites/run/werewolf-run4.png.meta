@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      werewolf-run4_0: -4617730427768101270
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

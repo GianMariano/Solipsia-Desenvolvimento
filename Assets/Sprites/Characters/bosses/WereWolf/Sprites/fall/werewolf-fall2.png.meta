@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      werewolf-fall2_0: -3097376928864759174
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
