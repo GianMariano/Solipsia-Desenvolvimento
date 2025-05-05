@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class Skeleton : Enemy
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private bool playerOnArea = false;
     protected override void Start()
     {
         
@@ -13,20 +13,51 @@ public class Skeleton : Enemy
     }
 
     
-    // Update is called once per frame
+    
     protected override void Update()
     {
         base.Update();
-        transform.position = Vector2.MoveTowards(transform.position, new Vector2(PlayerController.Instance.transform.position.x, transform.position.y), speed * Time.deltaTime);
-        // Flip na direção do jogador
-        if (PlayerController.Instance.transform.position.x > transform.position.x)
+
+        if (playerOnArea)
         {
-            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            transform.position = Vector2.MoveTowards(transform.position, new Vector2(PlayerController.Instance.transform.position.x, transform.position.y), speed * Time.deltaTime);
+
+            //Flip
+            if (PlayerController.Instance.transform.position.x > transform.position.x)
+            {
+                transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            }
+            else
+            {
+                transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            }
         }
-        else
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
         {
-            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            playerOnArea = true;
         }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerOnArea = false;
+        }
+    }
+
+    public void Activate()
+    {
+        playerOnArea = true;
+    }
+
+    public void Deactivate()
+    {
+        playerOnArea = false;
     }
 
 
