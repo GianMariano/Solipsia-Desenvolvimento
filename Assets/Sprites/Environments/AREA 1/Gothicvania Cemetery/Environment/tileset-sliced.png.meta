@@ -180,8 +180,8 @@ TextureImporter:
         serializedVersion: 2
         x: 176
         y: 48
-        width: 32
-        height: 48
+        width: 11
+        height: 11
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -293,7 +293,7 @@ TextureImporter:
         width: 32
         height: 31
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -328,6 +328,7 @@ TextureImporter:
       tileset-sliced_5: 8187979096719078458
       tileset-sliced_6: -2235941659904884338
       tileset-sliced_7: 1348046643
+      tileset-sliced_8: 262064599
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
