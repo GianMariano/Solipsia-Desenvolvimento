@@ -54,7 +54,7 @@ public class Enemy : MonoBehaviour
         if (_other.CompareTag("Player") && !PlayerController.Instance.pState.invincible)
         {
             float distanceToPlayer = Vector2.Distance(transform.position, PlayerController.Instance.transform.position);
-            if (distanceToPlayer < 0.5f) // ajuste
+            if (distanceToPlayer < 1f) // ajuste
             {
                 Attack();
             }

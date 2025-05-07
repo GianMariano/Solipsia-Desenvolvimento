@@ -174,6 +174,14 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    public void GainHealth(float _damage)
+    {
+        Debug.Log("Player recuperou vida!");
+        Health += Mathf.RoundToInt(_damage);
+        healthBar.SetHealth(health);
+
+    }
+
     void ShowGameOver()
     {
         if (gameOver != null)
@@ -250,14 +258,8 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-    
 
     
 
-   
-
-    
-
-    
 
 }
