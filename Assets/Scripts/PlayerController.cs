@@ -27,6 +27,14 @@ public class PlayerController : MonoBehaviour
     private bool attack = false;
     [Space(5)]
 
+    [Header("Fireball Settings:")]
+    [SerializeField] private GameObject fireballPrefab; // Assign this in Inspector
+    [SerializeField] private Transform fireballSpawnPoint; // Create an empty child object as spawn point
+    [SerializeField] private float fireballCooldown = 0.5f;
+    private float fireballCooldownTimer = 0f;
+    private bool fireballReady = true;
+    [Space(5)]
+
     [Header("Health Settings")]
     public int health;
     public int maxHealth;
@@ -35,11 +43,29 @@ public class PlayerController : MonoBehaviour
     public HealthBar healthBar;
     [Space(5)]
 
+    [Header("Power Ups:")]
+    [SerializeField] public bool canDash = true;
+    [SerializeField] public bool canShoot = true;
+    [SerializeField] public bool canDoubleJump = true;
+    [Space(5)]
+
+    [Header("Dash Settings:")]
+    [SerializeField] private float dashSpeed = 20f;
+    [SerializeField] private float dashDuration = 0.2f;
+    [SerializeField] private float dashCooldown = 1f;
+    [Space(5)]
+
     [HideInInspector] public PlayerStateList pState;
     private Rigidbody2D rb;
     private Animator anim;
     private float xAxis, yAxis;
     private float gravity;
+    private int jumpCount = 0; // Simple counter for jumps
+    private bool shoot = false;
+    private bool jumpButtonPressedLastFrame = false; // Track button state
+    private bool isDashing = false;
+    private float dashCooldownTimer = 0f;
+    private bool canDashNow = true;
     public static PlayerController Instance; 
     public GameObject gameOver;
     [SerializeField] private MoneyManager moneyManager;
@@ -57,7 +83,6 @@ public class PlayerController : MonoBehaviour
         }
 
         Health = maxHealth;
-        
     }
     
     void Start()
@@ -83,11 +108,36 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         GetInputs();
-        Move();
-        Jump();
-        Flip();
-        Attack(); 
         
+        if (!isDashing)
+        {
+            Move();
+            HandleJumpLogic();
+            Flip();
+            Attack();
+            CheckDash();
+            CheckFireball();
+        }
+        
+        // Update dash cooldown timer
+        if (dashCooldownTimer > 0)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+        }
+        else
+        {
+            canDashNow = true;
+        }
+        
+        // Update fireball cooldown timer
+        if (fireballCooldownTimer > 0)
+        {
+            fireballCooldownTimer -= Time.deltaTime;
+        }
+        else
+        {
+            fireballReady = true;
+        }
     }
 
     void GetInputs()
@@ -95,26 +145,28 @@ public class PlayerController : MonoBehaviour
         xAxis = Input.GetAxisRaw("Horizontal");
         yAxis = Input.GetAxisRaw("Vertical");
         attack = Input.GetMouseButtonDown(0);
+        shoot = Input.GetMouseButtonDown(1); // Right mouse button
     }
 
     void Move()
     {
-        rb.linearVelocity = new Vector2(walkSpeed * xAxis, rb.linearVelocity.y);
-        anim.SetBool("Walking", rb.linearVelocity.x != 0 && Grounded());
+        rb.velocity = new Vector2(walkSpeed * xAxis, rb.velocity.y);
+        anim.SetBool("Walking", rb.velocity.x != 0 && Grounded());
     }
 
     public bool Grounded()
     {
-        if (Physics2D.Raycast(groundCheckPoint.position, Vector2.down, groundCheckY, whatIsGround)
+        bool isGrounded = Physics2D.Raycast(groundCheckPoint.position, Vector2.down, groundCheckY, whatIsGround)
             || Physics2D.Raycast(groundCheckPoint.position + new Vector3(groundCheckX, 0, 0), Vector2.down, groundCheckY, whatIsGround)
-            || Physics2D.Raycast(groundCheckPoint.position + new Vector3(-groundCheckX, 0, 0), Vector2.down, groundCheckY, whatIsGround))
+            || Physics2D.Raycast(groundCheckPoint.position + new Vector3(-groundCheckX, 0, 0), Vector2.down, groundCheckY, whatIsGround);
+        
+        // Reset jump counter when grounded
+        if (isGrounded)
         {
-            return true;
+            jumpCount = 0;
         }
-        else
-        {
-            return false;
-        }
+        
+        return isGrounded;
     }
 
     void Flip()
@@ -131,6 +183,45 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void CheckFireball()
+    {
+        // Check if player can shoot and right mouse button is pressed
+        if (shoot && canShoot && fireballReady)
+        {
+            ShootFireball();
+        }
+    }
+
+    void ShootFireball()
+    {
+        // Set cooldown
+        fireballReady = false;
+        fireballCooldownTimer = fireballCooldown;
+        
+        // Determine the direction based on player facing
+        Vector3 fireballDirection = pState.lookingRight ? Vector3.right : Vector3.left;
+        
+        // Create the fireball
+        if (fireballSpawnPoint != null && fireballPrefab != null)
+        {
+            // Instantiate the fireball at the spawn point
+            GameObject fireball = Instantiate(fireballPrefab, fireballSpawnPoint.position, Quaternion.identity);
+            
+            // Set the fireball's direction based on player facing
+            if (!pState.lookingRight)
+            {
+                // Flip the fireball if player is facing left
+                fireball.transform.localScale = new Vector3(-fireball.transform.localScale.x, fireball.transform.localScale.y, fireball.transform.localScale.z);
+            }
+            
+            Debug.Log("Fireball shot!");
+        }
+        else
+        {
+            Debug.LogError("Fireball prefab or spawn point not assigned!");
+        }
+    }
+
     void Attack()
     {
         timeSinceAttack += Time.deltaTime;
@@ -144,7 +235,6 @@ public class PlayerController : MonoBehaviour
                 Hit(SideAttackTransform, SideAttackArea);
             }
         }
-
     }
 
     void Hit(Transform _attackTransform, Vector2 _attackArea)
@@ -164,6 +254,51 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void CheckDash()
+    {
+        // Check for F key press to trigger dash
+        if (Input.GetKeyDown(KeyCode.F) && canDash && canDashNow && !isDashing)
+        {
+            StartCoroutine(Dash());
+        }
+    }
+
+    IEnumerator Dash()
+    {
+        // Set dash state and reset cooldown
+        isDashing = true;
+        canDashNow = false;
+        dashCooldownTimer = dashCooldown;
+        
+        // Store original gravity
+        float originalGravity = rb.gravityScale;
+        
+        // Remove gravity during dash
+        rb.gravityScale = 0;
+        
+        // Get dash direction (based on player facing)
+        float dashDirection = pState.lookingRight ? 1f : -1f;
+        
+        // Apply dash force
+        rb.velocity = new Vector2(dashDirection * dashSpeed, 0);
+        
+        // Optional: Make player invincible during dash
+        pState.invincible = true;
+        
+        // Debug log
+        Debug.Log("Dashing!");
+        
+        // Wait for dash duration
+        yield return new WaitForSeconds(dashDuration);
+        
+        // Reset everything post-dash
+        isDashing = false;
+        rb.gravityScale = originalGravity;
+        pState.invincible = false;
+        
+        Debug.Log("Dash complete!");
+    }
+
     public void TakeDamage(float _damage)
     {
         Debug.Log("Player levou dano!");
@@ -171,7 +306,6 @@ public class PlayerController : MonoBehaviour
         Health -= Mathf.RoundToInt(_damage);
         StartCoroutine(StopTakingDamage());
         healthBar.SetHealth(health);
-
     }
 
     void ShowGameOver()
@@ -206,7 +340,6 @@ public class PlayerController : MonoBehaviour
             {
                 health = Mathf.Clamp(value, 0, maxHealth);
 
-
                 if (onHealthChangedCallback != null)
                 {
                     onHealthChangedCallback.Invoke();
@@ -219,22 +352,45 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Jump()
+    void HandleJumpLogic()
     {
-
-        if (Input.GetButtonUp("Jump") && rb.linearVelocity.y > 0)
+        bool jumpButtonPressed = Input.GetButtonDown("Jump");
+        
+        // Handle jump height control when releasing button
+        if (Input.GetButtonUp("Jump") && rb.velocity.y > 0)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         }
 
-        if (Input.GetButtonDown("Jump") && Grounded())
+        // Only register a new jump press (prevents holding button from triggering multiple jumps)
+        if (jumpButtonPressed && !jumpButtonPressedLastFrame)
         {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce);
+            // First jump from ground
+            if (Grounded())
+            {
+                PerformJump();
+                Debug.Log("First jump executed. Jump count: " + jumpCount);
+            }
+            // Double jump in air
+            else if (!Grounded() && canDoubleJump && jumpCount < 2)
+            {
+                PerformJump();
+                Debug.Log("Double jump executed. Jump count: " + jumpCount);
+            }
         }
 
+        // Update button tracking
+        jumpButtonPressedLastFrame = jumpButtonPressed;
+        
+        // Set animation state
         anim.SetBool("Jumping", !Grounded());
     }
 
+    void PerformJump()
+    {
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        jumpCount++;
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -243,21 +399,11 @@ public class PlayerController : MonoBehaviour
             // Destroi o item
             Destroy(collision.gameObject);
 
-            // Adiciona dinheiro (voc� precisar� acessar o PointManager)
+            // Adiciona dinheiro (você precisará acessar o PointManager)
             if (moneyManager != null)
             {
                 moneyManager.UpdateMoney(100);
             }
         }
     }
-    
-
-    
-
-   
-
-    
-
-    
-
 }
