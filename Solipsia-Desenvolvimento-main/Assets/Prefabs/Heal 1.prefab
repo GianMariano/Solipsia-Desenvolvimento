@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7093637245485835969
+--- !u!1 &6001797812112304405
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,39 +8,39 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8836622346728990264}
-  - component: {fileID: 6366414101974639041}
-  - component: {fileID: 6089271931074507393}
-  - component: {fileID: 1188624063737532142}
+  - component: {fileID: 3945141794201137067}
+  - component: {fileID: 4139137684623056625}
+  - component: {fileID: 124211826461471956}
+  - component: {fileID: 3547772492242152648}
   m_Layer: 0
-  m_Name: Heal
+  m_Name: Heal 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8836622346728990264
+--- !u!4 &3945141794201137067
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7093637245485835969}
+  m_GameObject: {fileID: 6001797812112304405}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -59.741756, y: -3.9882777, z: 0}
+  m_LocalPosition: {x: -59.735973, y: -3.9146197, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &6366414101974639041
+--- !u!212 &4139137684623056625
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7093637245485835969}
+  m_GameObject: {fileID: 6001797812112304405}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -89,13 +89,13 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &6089271931074507393
+--- !u!114 &124211826461471956
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7093637245485835969}
+  m_GameObject: {fileID: 6001797812112304405}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 89860eb5efa731547908afec80469721, type: 3}
@@ -105,13 +105,13 @@ MonoBehaviour:
   - "Voc\xEA j\xE1 est\xE1 com a vida completa."
   dialogueBox: {fileID: 0}
   dialogueText: {fileID: 0}
---- !u!61 &1188624063737532142
+--- !u!61 &3547772492242152648
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7093637245485835969}
+  m_GameObject: {fileID: 6001797812112304405}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1

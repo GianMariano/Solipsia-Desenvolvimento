@@ -12,13 +12,14 @@ public class Merchant : MonoBehaviour
     private int index = 0;
     private bool playerInRange = false;
     private bool dialogueActive = false;
+    private Animator animator;
+
 
     void Start()
     {
+        animator = GetComponent<Animator>();
         money = FindObjectOfType<MoneyManager>();
         player = FindObjectOfType<PlayerController>();
-        money.UpdateMoney(500);
-        player.TakeDamage(2);
     }
     void Update()
     {
@@ -96,6 +97,7 @@ public class Merchant : MonoBehaviour
         }
         else
         {
+            animator.SetTrigger("isSelling");
             money.UpdateMoney(-500);
             int healAmount = Mathf.RoundToInt(player.maxHealth * 0.2f);
             player.GainHealth(healAmount);

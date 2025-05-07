@@ -150,8 +150,8 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
-        rb.velocity = new Vector2(walkSpeed * xAxis, rb.velocity.y);
-        anim.SetBool("Walking", rb.velocity.x != 0 && Grounded());
+        rb.linearVelocity = new Vector2(walkSpeed * xAxis, rb.linearVelocity.y);
+        anim.SetBool("Walking", rb.linearVelocity.x != 0 && Grounded());
     }
 
     public bool Grounded()
@@ -280,7 +280,7 @@ public class PlayerController : MonoBehaviour
         float dashDirection = pState.lookingRight ? 1f : -1f;
         
         // Apply dash force
-        rb.velocity = new Vector2(dashDirection * dashSpeed, 0);
+        rb.linearVelocity = new Vector2(dashDirection * dashSpeed, 0);
         
         // Optional: Make player invincible during dash
         pState.invincible = true;
@@ -365,9 +365,9 @@ public class PlayerController : MonoBehaviour
         bool jumpButtonPressed = Input.GetButtonDown("Jump");
         
         // Handle jump height control when releasing button
-        if (Input.GetButtonUp("Jump") && rb.velocity.y > 0)
+        if (Input.GetButtonUp("Jump") && rb.linearVelocity.y > 0)
         {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
         }
 
         // Only register a new jump press (prevents holding button from triggering multiple jumps)
@@ -396,7 +396,7 @@ public class PlayerController : MonoBehaviour
 
     void PerformJump()
     {
-        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         jumpCount++;
     }
 
