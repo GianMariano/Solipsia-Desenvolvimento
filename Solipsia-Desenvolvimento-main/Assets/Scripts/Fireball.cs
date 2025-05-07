@@ -27,7 +27,7 @@ public class Fireball : MonoBehaviour
         
         // Apply velocity in the correct direction
         float direction = movingLeft ? -1f : 1f;
-        rb.velocity = new Vector2(direction * speed, 0);
+        rb.linearVelocity = new Vector2(direction * speed, 0);
     }
     
     private void OnTriggerEnter2D(Collider2D collision)
