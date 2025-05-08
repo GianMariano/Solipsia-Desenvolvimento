@@ -1,5 +1,4 @@
 using UnityEngine;
-
 public class Lancer : Enemy
 {
     public GameObject spearPrefab;
@@ -41,23 +40,29 @@ public class Lancer : Enemy
 
     void Shoot()
     {
-        Vector2 direction = (player.transform.position - shootPoint.position).normalized;
+        Vector2 direction = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
 
         GameObject spear = Instantiate(spearPrefab, shootPoint.position, Quaternion.identity);
         Rigidbody2D rb = spear.GetComponent<Rigidbody2D>();
-        rb.linearVelocity = direction * 10f;
+        Spear spearScript = spear.GetComponent<Spear>();
+        rb.linearVelocity = direction * spearScript.speed;
 
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        spear.transform.rotation = Quaternion.Euler(0, 0, angle + 45f); // compensando a inclinação original do sprite
+        spear.transform.rotation = Quaternion.Euler(0, 0, angle + 45f);
     }
+
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy Limiter") && collision.gameObject != gameObject)
+        if (collision.CompareTag("Enemy Limiter") && collision.gameObject.name.Contains("BodyCollider"))
         {
-            Debug.Log("BATI");
             speed = 0f;
         }
+    }
+
+    public void StopMovement()
+    {
+        speed = 0f;
     }
 
 

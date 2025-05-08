@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Spear : MonoBehaviour
 {
-    public float speed = 1f;
+    public float speed = 5f;
     public float lifetime = 3f;
     public float damage = 2f;
 
@@ -11,16 +11,15 @@ public class Spear : MonoBehaviour
         Destroy(gameObject, lifetime);
     }
 
-    void Update()
-    {
-        transform.Translate(Vector2.right * speed * Time.deltaTime);
-    }
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
             PlayerController.Instance.TakeDamage(damage);
+            Destroy(gameObject);
+        }
+        else if (other.CompareTag("Ground") || other.CompareTag("Wall"))
+        {
             Destroy(gameObject);
         }
     }
