@@ -8,12 +8,13 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float speed;
     [SerializeField] protected PlayerController player;
     [SerializeField] protected float damage;
+    [SerializeField] protected int goldGiven;
     private MoneyManager moneyManager;
     
-    // Start is called before the first frame update
+    
     protected virtual void Start()
     {
-        // Verifica se o MoneyManager existe antes de atribuir
+        
         GameObject moneyManagerObj = GameObject.Find("MoneyManager");
         if (moneyManagerObj != null)
         {
@@ -33,7 +34,7 @@ public class Enemy : MonoBehaviour
         {
             if (moneyManager != null)
             {
-                moneyManager.UpdateMoney(200); // Adiciona dinheiro
+                moneyManager.UpdateMoney(goldGiven); // Adiciona dinheiro
             }
             else
             {
@@ -64,4 +65,5 @@ public class Enemy : MonoBehaviour
     {
         PlayerController.Instance.TakeDamage(damage);
     }
+
 }

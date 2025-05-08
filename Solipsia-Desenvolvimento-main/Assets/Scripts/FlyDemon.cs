@@ -1,16 +1,18 @@
 using UnityEngine;
 
-public class FlyDemon : MonoBehaviour
+public class FlyDemon : Enemy
 {
     private Vector3 startPos;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         startPos = transform.position;
     }
 
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         FloatEffect();
     }
 
@@ -18,5 +20,10 @@ public class FlyDemon : MonoBehaviour
     {
         float floatY = Mathf.Sin(Time.time * 2f) * 1f;
         transform.position = startPos + new Vector3(0, floatY, 0);
+    }
+
+    public override void EnemyHit(float _damageDone)
+    {
+        base.EnemyHit(_damageDone);
     }
 }
