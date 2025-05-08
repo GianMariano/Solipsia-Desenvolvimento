@@ -2632,10 +2632,10 @@ TextureImporter:
       name: items_sheet_56
       rect:
         serializedVersion: 2
-        x: 304
+        x: 320
         y: 288
-        width: 32
-        height: 32
+        width: 16
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

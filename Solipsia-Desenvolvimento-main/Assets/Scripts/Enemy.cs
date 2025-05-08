@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float damage;
     [SerializeField] protected int goldGiven;
     private MoneyManager moneyManager;
+    protected bool active = false;
     
     
     protected virtual void Start()
@@ -64,6 +65,16 @@ public class Enemy : MonoBehaviour
     protected virtual void Attack()
     {
         PlayerController.Instance.TakeDamage(damage);
+    }
+
+        public void Activate()
+    {
+        active = true;
+    }
+
+    public void Deactivate()
+    {
+        active = false;
     }
 
 }

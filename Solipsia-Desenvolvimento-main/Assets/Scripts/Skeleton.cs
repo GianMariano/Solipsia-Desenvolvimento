@@ -18,7 +18,7 @@ public class Skeleton : Enemy
     {
         base.Update();
 
-        if (playerOnArea)
+        if (active)
         {
             transform.position = Vector2.MoveTowards(transform.position, new Vector2(PlayerController.Instance.transform.position.x, transform.position.y), speed * Time.deltaTime);
 
@@ -38,7 +38,7 @@ public class Skeleton : Enemy
     {
         if (other.CompareTag("Player"))
         {
-            playerOnArea = true;
+            active = true;
         }
     }
 
@@ -46,19 +46,10 @@ public class Skeleton : Enemy
     {
         if (other.CompareTag("Player"))
         {
-            playerOnArea = false;
+            active = false;
         }
     }
 
-    public void Activate()
-    {
-        playerOnArea = true;
-    }
-
-    public void Deactivate()
-    {
-        playerOnArea = false;
-    }
 
 
     public override void EnemyHit(float _damageDone)
