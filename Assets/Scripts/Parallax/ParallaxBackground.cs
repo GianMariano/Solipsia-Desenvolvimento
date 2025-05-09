@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class ParallaxController : MonoBehaviour
 {
-    Transform cam; //Main Camera
+    Transform cam; 
     Vector3 camStartPos;
-    float distance; //jarak antara start camera posisi dan current posisi
+    float distance; 
 
     GameObject[] backgrounds;
     Material[] mat;
@@ -17,7 +17,7 @@ public class ParallaxController : MonoBehaviour
     [Range(0.01f, 0.05f)]
     public float parallaxSpeed;
 
-    // Start is called before the first frame update
+    
     void Start()
     {
         cam = Camera.main.transform;
