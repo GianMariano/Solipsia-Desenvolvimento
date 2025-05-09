@@ -214,11 +214,11 @@ public class PlayerController : MonoBehaviour
                 fireball.transform.localScale = new Vector3(-fireball.transform.localScale.x, fireball.transform.localScale.y, fireball.transform.localScale.z);
             }
             
-            Debug.Log("Fireball shot!");
+
         }
         else
         {
-            Debug.LogError("Fireball prefab or spawn point not assigned!");
+
         }
     }
 
@@ -286,7 +286,6 @@ public class PlayerController : MonoBehaviour
         pState.invincible = true;
         
         // Debug log
-        Debug.Log("Dashing!");
         
         // Wait for dash duration
         yield return new WaitForSeconds(dashDuration);
@@ -296,12 +295,11 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = originalGravity;
         pState.invincible = false;
         
-        Debug.Log("Dash complete!");
     }
 
     public void TakeDamage(float _damage)
     {
-        Debug.Log("Player levou dano!");
+
         if (pState.invincible) return;
         Health -= Mathf.RoundToInt(_damage);
         StartCoroutine(StopTakingDamage());
@@ -310,7 +308,7 @@ public class PlayerController : MonoBehaviour
 
     public void GainHealth(float _damage)
     {
-        Debug.Log("Player recuperou vida!");
+
         Health += Mathf.RoundToInt(_damage);
         healthBar.SetHealth(health);
 
@@ -377,13 +375,13 @@ public class PlayerController : MonoBehaviour
             if (Grounded())
             {
                 PerformJump();
-                Debug.Log("First jump executed. Jump count: " + jumpCount);
+
             }
             // Double jump in air
             else if (!Grounded() && canDoubleJump && jumpCount < 2)
             {
                 PerformJump();
-                Debug.Log("Double jump executed. Jump count: " + jumpCount);
+
             }
         }
 

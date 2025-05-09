@@ -27,11 +27,10 @@ public class WereWolf : Enemy
 
     protected override void Attack()
     {
-        base.Attack();
     }
-    
     protected override void Start()
     {
+
         base.Start();
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
@@ -110,16 +109,17 @@ public class WereWolf : Enemy
                     animator.SetTrigger("Jump");
                     hasJumped = true;
                     JumpTowardsPlayer();
+                    Debug.Log("PULADO");
                 }
 
                 bool isGrounded = IsGrounded();
+                Debug.Log(isGrounded);
 
                 if (isGrounded && !wasGroundedLastFrame)
                 {
                     Debug.Log("Boss aterrissou");
-                    // ShakeCamera agora é chamado apenas quando toca o chão
                     ShakeCamera();
-                    
+
                     if (PlayerController.Instance.pState.grounded)
                     {
                         PlayerController.Instance.TakeDamage(damage);
@@ -128,8 +128,6 @@ public class WereWolf : Enemy
                     hasJumped = false;
                     currentState = DetermineNextDirection();
                 }
-
-                wasGroundedLastFrame = isGrounded;
                 break;
         }
     }
@@ -146,16 +144,16 @@ public class WereWolf : Enemy
     {
         float elapsed = 0f;
         Vector3 originalCameraPosition = mainCamera.transform.position;
-        
+
         while (elapsed < cameraShakeDuration)
         {
             Vector3 shakeOffset = Random.insideUnitCircle * cameraShakeIntensity;
             mainCamera.transform.position = originalCameraPosition + shakeOffset;
-            
+
             elapsed += Time.deltaTime;
             yield return null;
         }
-        
+
         mainCamera.transform.position = originalCameraPosition;
     }
 
@@ -187,7 +185,7 @@ public class WereWolf : Enemy
     {
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
     }
-    
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player") && currentState == BossState.Idle)
@@ -199,8 +197,8 @@ public class WereWolf : Enemy
     public override void EnemyHit(float _damageDone)
     {
         base.EnemyHit(_damageDone);
-        
-        switch(currentState)
+
+        switch (currentState)
         {
             case BossState.Stunned:
                 Debug.Log("Dano crítico - boss está atordoado!");
@@ -210,4 +208,6 @@ public class WereWolf : Enemy
                 break;
         }
     }
+
+
 }

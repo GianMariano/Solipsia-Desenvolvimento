@@ -11,11 +11,11 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected int goldGiven;
     private MoneyManager moneyManager;
     protected bool active = false;
-    
-    
+
+
     protected virtual void Start()
     {
-        
+
         GameObject moneyManagerObj = GameObject.Find("MoneyManager");
         if (moneyManagerObj != null)
         {
@@ -27,7 +27,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    
+
     // Update is called once per frame
     protected virtual void Update()
     {
@@ -48,7 +48,7 @@ public class Enemy : MonoBehaviour
     public virtual void EnemyHit(float _damageDone)
     {
         health -= _damageDone;
-        
+
     }
 
     protected void OnTriggerStay2D(Collider2D _other)
@@ -67,7 +67,8 @@ public class Enemy : MonoBehaviour
         PlayerController.Instance.TakeDamage(damage);
     }
 
-        public void Activate()
+
+    public void Activate()
     {
         active = true;
     }
