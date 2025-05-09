@@ -16,6 +16,7 @@ public class WereWolf : Enemy
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float cameraShakeIntensity = 0.2f;
     [SerializeField] private float cameraShakeDuration = 0.5f;
+    [SerializeField] private BoxCollider2D doorCollider;
     private Rigidbody2D rb;
 
     private float stunTimer;
@@ -39,7 +40,18 @@ public class WereWolf : Enemy
 
     protected override void Update()
     {
-        base.Update();
+        if (health <= 0)
+        {
+            if (doorCollider != null && doorCollider.enabled)
+            {
+                doorCollider.enabled = false;
+                Debug.Log("Porta destravada!");
+            }
+        }
+
+        base.Update(); // Mantém a lógica de destruição do inimigo e outras coisas da classe Enemy
+  
+    if (health <= 0) return;
 
         switch (currentState)
         {
@@ -207,6 +219,7 @@ public class WereWolf : Enemy
                 Debug.Log("Boss levou dano!");
                 break;
         }
+        
     }
 
 
