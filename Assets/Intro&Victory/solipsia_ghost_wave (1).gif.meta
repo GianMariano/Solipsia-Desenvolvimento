@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      solipsia_ghost_wave (1)_0: 7151032482606108467
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
