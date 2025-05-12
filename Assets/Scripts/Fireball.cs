@@ -7,10 +7,10 @@ public class Fireball : MonoBehaviour
     [Header("Fireball Settings")]
     [SerializeField] private float speed = 12f;
     [SerializeField] private float lifetime = 3f;
-    [SerializeField] private float damage = 5f;
+    [SerializeField] private float damage = 10f;
+    [SerializeField] private string targetTag = "DestructibleObject"; // Tag for objects with colliders to disable
     
     private Rigidbody2D rb;
-    private bool movingLeft = false;
     
     void Awake()
     {
@@ -22,16 +22,29 @@ public class Fireball : MonoBehaviour
         // Destroy the fireball after its lifetime
         Destroy(gameObject, lifetime);
         
-        // Determine direction from scale (set by PlayerController)
-        movingLeft = transform.localScale.x < 0;
+        // Get direction from scale (negative X scale means moving left)
+        float direction = transform.localScale.x > 0 ? 1f : -1f;
         
-        // Apply velocity in the correct direction
-        float direction = movingLeft ? -1f : 1f;
-        rb.linearVelocity = new Vector2(direction * speed, 0);
+        // Set velocity in the correct direction
+        rb.velocity = new Vector2(direction * speed, 0);
     }
     
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        // Check if we hit the target object
+        if (collision.CompareTag(targetTag))
+        {
+            // Get the target object component and disable its collider
+            DestructibleObject destructible = collision.GetComponent<DestructibleObject>();
+            if (destructible != null)
+            {
+                destructible.DisableCollider();
+            }
+            
+            // Destroy the fireball
+            Destroy(gameObject);
+        }
+        
         // Check if we hit an enemy
         Enemy enemy = collision.GetComponent<Enemy>();
         if (enemy != null)
