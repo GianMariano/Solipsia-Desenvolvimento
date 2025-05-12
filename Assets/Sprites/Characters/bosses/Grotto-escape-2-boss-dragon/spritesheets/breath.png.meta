@@ -70,7 +70,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -108,7 +108,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -154,7 +154,7 @@ TextureImporter:
         width: 73
         height: 40
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -176,7 +176,7 @@ TextureImporter:
         width: 75
         height: 49
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -198,7 +198,7 @@ TextureImporter:
         width: 58
         height: 56
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -212,37 +212,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: breath_3
-      rect:
-        serializedVersion: 2
-        x: 472
-        y: 2
-        width: 25
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0035f2d52f3de03c0800000000000000
-      internalID: -4391339548740726016
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: breath_4
       rect:
         serializedVersion: 2
-        x: 491
+        x: 472
         y: 0
-        width: 66
+        width: 85
         height: 52
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -256,37 +234,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: breath_5
-      rect:
-        serializedVersion: 2
-        x: 609
-        y: 0
-        width: 31
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3cf36115224bdeac0800000000000000
-      internalID: -3824202449085382717
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: breath_6
       rect:
         serializedVersion: 2
-        x: 635
+        x: 610
         y: 0
-        width: 69
+        width: 94
         height: 50
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -300,59 +256,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: breath_7
-      rect:
-        serializedVersion: 2
-        x: 736
-        y: 10
-        width: 11
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bf2d62d48b800e6c0800000000000000
-      internalID: -4116280471755238661
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: breath_8
-      rect:
-        serializedVersion: 2
-        x: 742
-        y: 0
-        width: 42
-        height: 29
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 230df0261edcf8a20800000000000000
-      internalID: 3066896239159136306
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: breath_9
       rect:
         serializedVersion: 2
-        x: 779
+        x: 737
         y: 0
-        width: 66
+        width: 108
         height: 52
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -366,37 +278,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: breath_10
-      rect:
-        serializedVersion: 2
-        x: 878
-        y: 0
-        width: 49
-        height: 29
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7e9537e78ccd1f440800000000000000
-      internalID: 4967994617639426535
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: breath_11
       rect:
         serializedVersion: 2
-        x: 923
+        x: 879
         y: 0
-        width: 69
+        width: 113
         height: 50
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -413,7 +303,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 6c1085092db670f45b9dcb6f97eb56d9
     internalID: 0
     vertices: []
     indices: 
