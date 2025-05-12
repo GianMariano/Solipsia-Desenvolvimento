@@ -8,15 +8,22 @@ public class HellBeast : Enemy
     public Transform rightEdge;
     public Transform shootPoint;
     private Animator animator;
+    private float originalHealth;
 
     public bool isInvulnerable = true;
 
     private bool isOnRight = true;
 
+    private Coroutine phase1Routine;
+    private bool isPhase2Active = false;
+
+    public GameObject phase2Object;
+
     void Start()
     {
         animator = GetComponent<Animator>();
-        StartCoroutine(ChargeAttack(5f));
+        originalHealth = health;
+        phase1Routine = StartCoroutine(AttackCycle1());
     }
 
     IEnumerator AttackCycle1()
@@ -89,34 +96,46 @@ public class HellBeast : Enemy
         }
     }
 
-    IEnumerator ChargeAttack(float duration)
+    public IEnumerator BecomeVulnerable(float flashDuration)
     {
-        Debug.Log("METODO CHAMADO");
-        animator.SetBool("isCharge", true);
-        yield return new WaitForSeconds(duration);
-        animator.SetBool("isCharge", false); 
-
-    }
-
-    IEnumerator BecomeVulnerable(float flashDuration)
-    {
-
         isInvulnerable = false;
         animator.SetTrigger("isStunned");
         yield return new WaitForSeconds(flashDuration);
         animator.SetTrigger("isStunned");
         isInvulnerable = true;
-
     }
 
     public override void EnemyHit(float _damageDone)
     {
-        Debug.Log("ELE ESTÁ" + isInvulnerable);
         if (!isInvulnerable)
         {
+            health -= _damageDone;
             base.EnemyHit(_damageDone);
+
+            if (health <= originalHealth / 2 && !isPhase2Active)
+            {
+                StartCoroutine(SwitchToPhase2());
+            }
         }
+    }
 
+    private IEnumerator SwitchToPhase2()
+    {
+        isPhase2Active = true;
 
+        if (phase1Routine != null)
+            StopCoroutine(phase1Routine);
+
+        phase2Object.SetActive(true);
+        this.gameObject.SetActive(false);
+
+        HellBeastPhase2 phase2Script = phase2Object.GetComponent<HellBeastPhase2>();
+        yield return new WaitUntil(() => phase2Script.IsPhase2Finished);
+
+        this.gameObject.SetActive(true);
+        phase2Object.SetActive(false);
+
+        yield return StartCoroutine(BecomeVulnerable(5f));
+        phase1Routine = StartCoroutine(AttackCycle1());
     }
 }
