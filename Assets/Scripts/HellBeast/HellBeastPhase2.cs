@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+
 public class HellBeastPhase2 : MonoBehaviour
 {
     private Animator animator;
@@ -9,12 +10,9 @@ public class HellBeastPhase2 : MonoBehaviour
     public Transform midle;
     public Transform rightEdge;
     public Transform rightMidle;
-    public bool IsPhase2Finished { get; private set; } = false;
 
+    public HellBeast hellBeastScript;
 
-    public GameObject hellBeastPhase1Object;
-
-    int damage = 2;
     private Vector3 targetPosition;
     private float moveSpeed = 0f;
     private bool isMoving = false;
@@ -27,6 +25,8 @@ public class HellBeastPhase2 : MonoBehaviour
 
     IEnumerator Attack()
     {
+        yield return PlayChargeAnimation();
+
         yield return MoveToPoint(leftEdge, 1f);
         yield return TeleportToPoint(midle, 1f);
         yield return MoveToPoint(leftMidle, 1.5f);
@@ -35,22 +35,14 @@ public class HellBeastPhase2 : MonoBehaviour
         yield return MoveToPoint(rightEdge, 2.5f);
         yield return TeleportToPoint(leftEdge, 0.5f);
         yield return MoveToPoint(rightEdge, 3f);
-        animator.SetTrigger("backToNormal");
 
-
-        yield return new WaitForSeconds(1f);
-
-        hellBeastPhase1Object.SetActive(true);
-        gameObject.SetActive(false);
-
-        HellBeast hellBeastScript = hellBeastPhase1Object.GetComponent<HellBeast>();
         if (hellBeastScript != null)
         {
-            hellBeastScript.StartCoroutine(hellBeastScript.BecomeVulnerable(5f));
+            hellBeastScript.gameObject.SetActive(true);
+            hellBeastScript.MakeVulnerableNow(5f);
         }
 
-        animator.SetTrigger("backToNormal");
-        IsPhase2Finished = true;
+        gameObject.SetActive(false);
     }
 
     public IEnumerator MoveToPoint(Transform target, float speed)
@@ -59,9 +51,10 @@ public class HellBeastPhase2 : MonoBehaviour
         moveSpeed = speed;
         isMoving = true;
 
-        animator.SetTrigger("isAttacking");
-
-        yield return new WaitUntil(() => !isMoving);
+        while (isMoving)
+        {
+            yield return PlayChargeAttackingAnimation();
+        }
     }
 
     public IEnumerator TeleportToPoint(Transform point, float delay)
@@ -69,11 +62,30 @@ public class HellBeastPhase2 : MonoBehaviour
         yield return new WaitForSeconds(delay);
 
         transform.position = new Vector3(point.position.x, transform.position.y, transform.position.z);
+        transform.localScale = new Vector3(point.position.x < transform.position.x ? -1f : 1f, 1f, 1f);
 
-        if (point.position.x < transform.position.x)
-            transform.localScale = new Vector3(-1f, 1f, 1f);
-        else
-            transform.localScale = new Vector3(1f, 1f, 1f);
+        yield return PlayChargeAnimation();
+    }
+
+    public IEnumerator PlayChargeAnimation()
+    {
+        animator.CrossFade("Charge", 0.1f);
+        yield return WaitForAnimationToEnd("Charge");
+    }
+
+    public IEnumerator PlayChargeAttackingAnimation()
+    {
+        if (!animator.GetCurrentAnimatorStateInfo(0).IsName("ChargeAttacking"))
+        {
+            animator.CrossFade("ChargeAttacking", 0.1f);
+        }
+        yield return WaitForAnimationToEnd("ChargeAttacking");
+    }
+
+    private IEnumerator WaitForAnimationToEnd(string stateName)
+    {
+        yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName(stateName));
+        yield return new WaitWhile(() => animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
     }
 
     void Update()

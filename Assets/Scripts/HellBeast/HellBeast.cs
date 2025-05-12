@@ -11,7 +11,6 @@ public class HellBeast : Enemy
     private float originalHealth;
 
     public bool isInvulnerable = true;
-
     private bool isOnRight = true;
 
     private Coroutine phase1Routine;
@@ -105,10 +104,17 @@ public class HellBeast : Enemy
         isInvulnerable = true;
     }
 
+    public void MakeVulnerableNow(float duration)
+    {
+        StartCoroutine(BecomeVulnerable(duration));
+    }
+
     public override void EnemyHit(float _damageDone)
     {
         if (!isInvulnerable)
         {
+            Debug.Log("DANO TOMADO");
+            Debug.Log(_damageDone);
             health -= _damageDone;
             base.EnemyHit(_damageDone);
 
@@ -126,16 +132,12 @@ public class HellBeast : Enemy
         if (phase1Routine != null)
             StopCoroutine(phase1Routine);
 
-        phase2Object.SetActive(true);
-        this.gameObject.SetActive(false);
-
         HellBeastPhase2 phase2Script = phase2Object.GetComponent<HellBeastPhase2>();
-        yield return new WaitUntil(() => phase2Script.IsPhase2Finished);
+        phase2Script.hellBeastScript = this;
 
-        this.gameObject.SetActive(true);
-        phase2Object.SetActive(false);
+        phase2Object.SetActive(true);
+        gameObject.SetActive(false);
 
-        yield return StartCoroutine(BecomeVulnerable(5f));
-        phase1Routine = StartCoroutine(AttackCycle1());
+        yield return null; 
     }
 }
