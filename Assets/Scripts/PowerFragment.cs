@@ -18,6 +18,8 @@ public class PowerFragment : MonoBehaviour
     [SerializeField] private float pulseSpeed = 2.0f; // Speed of the pulse effect
     
     private Vector3 originalScale;
+
+    public PlayerController player; // arraste o Player no Inspector
     
     private void Start()
     {
@@ -41,6 +43,7 @@ public class PowerFragment : MonoBehaviour
         
         if (player != null)
         {
+
             // Grant the selected powers
             if (grantDash)
             {
@@ -68,6 +71,10 @@ public class PowerFragment : MonoBehaviour
             
             // Destroy the power fragment
             Destroy(gameObject);
+
+            StartCoroutine(WhiteFadeController.Instance.WhiteFadeOut());
+
+            player.RespawnPlayer();
         }
     }
 }

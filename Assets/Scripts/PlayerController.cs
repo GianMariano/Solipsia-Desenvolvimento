@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI; 
 
 public class PlayerController : MonoBehaviour
 {
@@ -56,6 +57,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashColliderYScale = 0.5f; // How much to reduce collider height (0.5 = half size)
     [Space(5)]
 
+    [Header("Checkpoint Settings")]
+    private Vector3 respawnPosition;
+    private bool checkpointReached = false;
+
     [HideInInspector] public PlayerStateList pState;
     private Rigidbody2D rb;
     private Animator anim;
@@ -72,6 +77,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 originalColliderOffset;
     public static PlayerController Instance; 
     public GameObject gameOver;
+    private bool isDead = false;
     [SerializeField] private MoneyManager moneyManager;
     
 
@@ -90,7 +96,7 @@ public class PlayerController : MonoBehaviour
     }
     
     void Start()
-    {
+    {   
         pState = GetComponent<PlayerStateList>();
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
@@ -110,6 +116,8 @@ public class PlayerController : MonoBehaviour
         {
             moneyManager = moneyManagerObj.GetComponent<MoneyManager>();
         }
+
+        respawnPosition = transform.position;
     }
 
     private void OnDrawGizmos()
@@ -151,6 +159,7 @@ public class PlayerController : MonoBehaviour
         {
             fireballReady = true;
         }
+
     }
 
     void GetInputs()
@@ -333,13 +342,12 @@ public class PlayerController : MonoBehaviour
         healthBar.SetHealth(health);
     }
 
-    void ShowGameOver()
+    public void RespawnPlayer()
     {
-        if (gameOver != null)
-        {
-            gameOver.SetActive(true); // Ativa a tela de Game Over
-            Time.timeScale = 0f; // Pausa o jogo
-        }
+    transform.position = respawnPosition;
+    Health = maxHealth;
+    healthBar.SetHealth(health);
+    rb.velocity = Vector2.one; 
     }
 
     IEnumerator StopTakingDamage()
@@ -372,7 +380,9 @@ public class PlayerController : MonoBehaviour
             }
             if (health == 0)
             {
-                ShowGameOver();
+                GameOverController.Instance.TriggerGameOver();  // Exibe a tela de Game Over 
+                rb.velocity = Vector2.zero;  // Impede qualquer movimento quando morto
+                anim.SetTrigger("Dead");  // Aciona a animação de morte 
             }
         }
     }
@@ -428,5 +438,10 @@ public class PlayerController : MonoBehaviour
                 moneyManager.UpdateMoney(100);
             }
         }
+    }
+    public void SetCheckpoint(Vector3 newCheckpoint)
+    {
+        respawnPosition = newCheckpoint;
+        checkpointReached = true;
     }
 }
