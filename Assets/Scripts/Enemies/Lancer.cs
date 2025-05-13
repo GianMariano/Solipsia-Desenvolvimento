@@ -54,9 +54,10 @@ public class Lancer : Enemy
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Enemy Limiter") && collision.gameObject.name.Contains("BodyCollider"))
+        // Verifica apenas se o objeto com o qual colidiu tem a tag "Enemy Limiter"
+        if (collision.CompareTag("Enemy Limiter"))
         {
-            speed = 0f;
+            speed = 0f; // Define a velocidade como zero
         }
     }
 
