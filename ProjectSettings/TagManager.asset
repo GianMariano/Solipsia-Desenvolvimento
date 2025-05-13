@@ -3,15 +3,25 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Item
+  - Enemy
+<<<<<<< HEAD
+  - Wall
+  - Ground
+  - Special
+=======
+  - DestructibleObject
+  - Enemy Limiter
+>>>>>>> 440ab9cbde625ebbac43923d2afc5bea80791b89
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
-  - 
+  - Attackable
   - 
   - 
   - 
@@ -40,6 +50,33 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 4199540691
+    locked: 0
+  - name: Foreground
+    uniqueID: 1018573457
+    locked: 0
+  - name: ObjectBack
+    uniqueID: 2706343395
+    locked: 0
+  - name: ObjectMiddle
+    uniqueID: 4042857591
+    locked: 0
+  - name: Ground2
+    uniqueID: 172133731
+    locked: 0
+  - name: Enemy
+    uniqueID: 3143366379
+    locked: 0
+  - name: Player
+    uniqueID: 3023095651
+    locked: 0
+  - name: Ground
+    uniqueID: 776363811
+    locked: 0
+  - name: ObjectFront
+    uniqueID: 1997570569
     locked: 0
   m_RenderingLayers:
   - Default
