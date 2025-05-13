@@ -16,7 +16,7 @@ public class HellBeast : Enemy
     private bool isOnRight = true;
 
     private Coroutine phase1Routine;
-    private bool isPhase2Active = false;
+    private bool isPhase2CurrentlyActive = false;
 
     public GameObject phase2Object;
     private bool isTakingDamageCooldown = false;
@@ -25,39 +25,51 @@ public class HellBeast : Enemy
     {
         animator = GetComponent<Animator>();
         originalHealth = health;
-        // phase1Routine = StartCoroutine(AttackCycle1());
-        StartCoroutine(BecomeVulnerable(5f));
+
+        if (phase2Object == null)
+        {
+            phase1Routine = StartCoroutine(AttackCycle1());
+        }
+        else
+        {
+            phase1Routine = StartCoroutine(AttackCycle1());
+        }
 
         if (healPrefab != null)
             healPrefab.SetActive(false);
+    }
+
+    void OnEnable()
+    {
+        if (animator == null) animator = GetComponent<Animator>();
+        isTakingDamageCooldown = false;
     }
 
     IEnumerator AttackCycle1()
     {
         while (true)
         {
-            yield return StartCoroutine(TeleportAfterDelay(3f));
-            yield return StartCoroutine(ShootFireballBurst(1, 1f, 0.5f));
+            if (phase2Object != null && health <= originalHealth / 2 && !isPhase2CurrentlyActive)
+            {
+                StartCoroutine(SwitchToPhase2());
+                yield break;
+            }
 
             yield return StartCoroutine(TeleportAfterDelay(3f));
             yield return StartCoroutine(ShootFireballBurst(1, 1f, 0.5f));
-
+            yield return StartCoroutine(TeleportAfterDelay(3f));
+            yield return StartCoroutine(ShootFireballBurst(1, 1f, 0.5f));
             yield return StartCoroutine(TeleportAfterDelay(0.5f));
             yield return StartCoroutine(ShootFireballBurst(1, 1f, 0.5f));
-
             yield return StartCoroutine(TeleportAfterDelay(0.5f));
             yield return StartCoroutine(ShootFireballBurst(1, 1f, 0.5f));
-
             yield return StartCoroutine(TeleportAfterDelay(1.5f));
             yield return StartCoroutine(ShootFireballBurst(3, 2f, 0.7f));
-
             yield return StartCoroutine(TeleportAfterDelay(1.5f));
             yield return StartCoroutine(ShootFireballBurst(3, 2f, 0.7f));
-
             yield return StartCoroutine(TeleportAfterDelay(1.5f));
             yield return StartCoroutine(ShootFireballBurst(4, 2f, 0.5f));
             yield return StartCoroutine(ShootFireballBurst(2, 3f, 0.8f));
-
             yield return StartCoroutine(TeleportAfterDelay(1.5f));
             yield return StartCoroutine(ShootFireballBurst(4, 2f, 0.5f));
             yield return StartCoroutine(ShootFireballBurst(2, 3f, 0.8f));
@@ -69,7 +81,6 @@ public class HellBeast : Enemy
     IEnumerator TeleportAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-
         if (isOnRight)
         {
             transform.position = leftEdge.position;
@@ -80,7 +91,6 @@ public class HellBeast : Enemy
             transform.position = rightEdge.position;
             transform.localScale = new Vector3(1f, 1f, 1f);
         }
-
         isOnRight = !isOnRight;
     }
 
@@ -88,16 +98,16 @@ public class HellBeast : Enemy
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player == null) yield break;
-
         float xDirection = player.transform.position.x - transform.position.x;
         int direction = xDirection >= 0 ? 1 : -1;
-
         for (int i = 0; i < quantity; i++)
         {
             GameObject fireballObj = Instantiate(fireballPrefab, shootPoint.position, Quaternion.identity);
             BossFireball fireball = fireballObj.GetComponent<BossFireball>();
-            fireball.Launch(direction, speed);
-
+            if (fireball != null)
+            {
+                fireball.Launch(direction, speed);
+            }
             yield return new WaitForSeconds(cooldownBetweenShots);
         }
     }
@@ -105,6 +115,7 @@ public class HellBeast : Enemy
     public IEnumerator BecomeVulnerable(float flashDuration)
     {
         isInvulnerable = false;
+        isTakingDamageCooldown = false;
         animator.SetTrigger("isStunned");
 
         if (healPrefab != null)
@@ -112,13 +123,31 @@ public class HellBeast : Enemy
 
         yield return new WaitForSeconds(flashDuration);
 
-        animator.SetTrigger("isStunned");
+        animator.ResetTrigger("isStunned");
+        animator.SetTrigger("isIdle");
         isInvulnerable = true;
+        if (healPrefab != null)
+            healPrefab.SetActive(false);
+
+        if (phase2Object != null && health <= originalHealth / 2)
+        {
+            if (!phase2Object.activeSelf)
+            {
+                isPhase2CurrentlyActive = true;
+                phase2Object.SetActive(true);
+                gameObject.SetActive(false);
+            }
+        }
     }
 
     public void MakeVulnerableNow(float duration)
     {
-        StartCoroutine(BecomeVulnerable(duration));
+        isTakingDamageCooldown = false;
+        if (gameObject.activeSelf)
+        {
+            StartCoroutine(BecomeVulnerable(duration));
+        }
+
     }
 
     public override void EnemyHit(float _damageDone)
@@ -134,36 +163,66 @@ public class HellBeast : Enemy
         isTakingDamageCooldown = true;
 
         health -= damage;
-        base.EnemyHit(damage);
+        base.EnemyHit(damage); 
 
-        Debug.Log(isPhase2Active);
-        if (health <= originalHealth / 2 && !isPhase2Active)
+        
+        if (health <= 0)
+        {
+            
+            
+            isInvulnerable = true; 
+
+            
+            GameObject[] especiais = GameObject.FindGameObjectsWithTag("Special");
+            foreach (GameObject obj in especiais)
+            {
+                Destroy(obj);
+            }
+
+            
+            Destroy(gameObject);
+            yield break; 
+        }
+        
+
+        
+        if (phase2Object != null && health <= originalHealth / 2 && !isPhase2CurrentlyActive)
         {
             StartCoroutine(SwitchToPhase2());
         }
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f); 
         isTakingDamageCooldown = false;
     }
 
+
     private IEnumerator SwitchToPhase2()
     {
-        Debug.Log("chamado");
-        isPhase2Active = true;
+        isPhase2CurrentlyActive = true;
 
         if (phase1Routine != null)
+        {
             StopCoroutine(phase1Routine);
-        Debug.Log("é aqui certeza");
+            phase1Routine = null;
+        }
 
         HellBeastPhase2 phase2Script = phase2Object.GetComponent<HellBeastPhase2>();
-        phase2Script.hellBeastScript = this;
+        if (phase2Script != null)
+        {
+            phase2Script.hellBeastScript = this;
+        }
+        else
+        {
+            
+            
+            isPhase2CurrentlyActive = false;
+            yield break;
+        }
 
         phase2Object.SetActive(true);
         gameObject.SetActive(false);
-        
-        Debug.Log("CARALHO");
-        isPhase2Active = false;
 
         yield return null;
     }
 }
+

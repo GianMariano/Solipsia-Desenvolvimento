@@ -17,9 +17,17 @@ public class HellBeastPhase2 : MonoBehaviour
     private float moveSpeed = 0f;
     private bool isMoving = false;
 
-    void Start()
+    void Awake()
     {
         animator = GetComponent<Animator>();
+    }
+
+    void OnEnable()
+    {
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
         StartCoroutine(Attack());
     }
 
@@ -51,9 +59,11 @@ public class HellBeastPhase2 : MonoBehaviour
         moveSpeed = speed;
         isMoving = true;
 
+        StartCoroutine(PlayChargeAttackingAnimation());
+
         while (isMoving)
         {
-            yield return PlayChargeAttackingAnimation();
+            yield return null; 
         }
     }
 
@@ -62,7 +72,14 @@ public class HellBeastPhase2 : MonoBehaviour
         yield return new WaitForSeconds(delay);
 
         transform.position = new Vector3(point.position.x, transform.position.y, transform.position.z);
-        transform.localScale = new Vector3(point.position.x < transform.position.x ? -1f : 1f, 1f, 1f);
+        if (point.position.x < transform.position.x && transform.localScale.x > 0)
+        {
+            transform.localScale = new Vector3(-1f, 1f, 1f);
+        }
+        else if (point.position.x > transform.position.x && transform.localScale.x < 0)
+        {
+            transform.localScale = new Vector3(1f, 1f, 1f);
+        }
 
         yield return PlayChargeAnimation();
     }
@@ -79,13 +96,13 @@ public class HellBeastPhase2 : MonoBehaviour
         {
             animator.CrossFade("ChargeAttacking", 0.1f);
         }
-        yield return WaitForAnimationToEnd("ChargeAttacking");
+        yield return null; 
     }
 
     private IEnumerator WaitForAnimationToEnd(string stateName)
     {
         yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName(stateName));
-        yield return new WaitWhile(() => animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
+        yield return new WaitWhile(() => animator.GetCurrentAnimatorStateInfo(0).IsName(stateName) && animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f);
     }
 
     void Update()
@@ -102,3 +119,4 @@ public class HellBeastPhase2 : MonoBehaviour
         }
     }
 }
+
