@@ -133,7 +133,7 @@ public class ErevosFireball : MonoBehaviour
         Rigidbody2D rb = fireball.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            rb.velocity = direction * fireballSpeed;
+            rb.linearVelocity = direction * fireballSpeed;
         }
         
         // Rotaciona a bola de fogo na direção do movimento
