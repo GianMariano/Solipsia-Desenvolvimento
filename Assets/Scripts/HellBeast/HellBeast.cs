@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
 
 public class HellBeast : Enemy
 {
@@ -21,10 +22,100 @@ public class HellBeast : Enemy
     public GameObject phase2Object;
     private bool isTakingDamageCooldown = false;
 
-    void Start()
+    // Diálogo
+    [Header("Dialogue Settings")]
+    [SerializeField] private string[] dialogueLines;
+    [SerializeField] private float timeBetweenLines = 2f;
+    [SerializeField] private GameObject dialogueBox;
+    [SerializeField] private TextMeshProUGUI dialogueText;
+
+    private bool isInDialogue = false;
+    private int currentLine = 0;
+    private float dialogueTimer = 0f;
+    private bool battleStarted = false;
+
+    protected override void Start()
     {
         animator = GetComponent<Animator>();
         originalHealth = health;
+
+        if (healPrefab != null)
+            healPrefab.SetActive(false);
+
+        // Inicia diálogo se houver falas, senão começa a batalha direto
+        if (dialogueLines != null && dialogueLines.Length > 0)
+        {
+            StartDialogue();
+        }
+        else
+        {
+            StartBattle();
+        }
+    }
+
+    protected override void Update()
+    {
+        UpdateDialogue();
+    }
+
+    void OnEnable()
+    {
+        if (animator == null) animator = GetComponent<Animator>();
+        isTakingDamageCooldown = false;
+    }
+
+    // ------------------ DIÁLOGO --------------------
+
+    private void StartDialogue()
+    {
+        isInDialogue = true;
+        currentLine = 0;
+        dialogueTimer = timeBetweenLines;
+
+        if (dialogueBox != null) dialogueBox.SetActive(true);
+        ShowCurrentLine();
+    }
+
+    private void ShowCurrentLine()
+    {
+        if (dialogueText != null && currentLine < dialogueLines.Length)
+        {
+            dialogueText.text = dialogueLines[currentLine];
+        }
+    }
+
+    private void UpdateDialogue()
+    {
+        if (!isInDialogue) return;
+
+        dialogueTimer -= Time.deltaTime;
+
+        if (dialogueTimer <= 0)
+        {
+            currentLine++;
+
+            if (currentLine >= dialogueLines.Length)
+            {
+                EndDialogue();
+            }
+            else
+            {
+                ShowCurrentLine();
+                dialogueTimer = timeBetweenLines;
+            }
+        }
+    }
+
+    private void EndDialogue()
+    {
+        isInDialogue = false;
+        if (dialogueBox != null) dialogueBox.SetActive(false);
+        StartBattle();
+    }
+
+    private void StartBattle()
+    {
+        battleStarted = true;
 
         if (phase2Object == null)
         {
@@ -34,21 +125,16 @@ public class HellBeast : Enemy
         {
             phase1Routine = StartCoroutine(AttackCycle1());
         }
-
-        if (healPrefab != null)
-            healPrefab.SetActive(false);
     }
 
-    void OnEnable()
-    {
-        if (animator == null) animator = GetComponent<Animator>();
-        isTakingDamageCooldown = false;
-    }
+    // ------------------ ATAQUES --------------------
 
     IEnumerator AttackCycle1()
     {
         while (true)
         {
+            if (!battleStarted) yield break;
+
             if (phase2Object != null && health <= originalHealth / 2 && !isPhase2CurrentlyActive)
             {
                 StartCoroutine(SwitchToPhase2());
@@ -147,7 +233,6 @@ public class HellBeast : Enemy
         {
             StartCoroutine(BecomeVulnerable(duration));
         }
-
     }
 
     public override void EnemyHit(float _damageDone)
@@ -165,27 +250,20 @@ public class HellBeast : Enemy
         health -= damage;
         base.EnemyHit(damage); 
 
-        
         if (health <= 0)
         {
-            
-            
-            isInvulnerable = true; 
+            isInvulnerable = true;
 
-            
             GameObject[] especiais = GameObject.FindGameObjectsWithTag("Special");
             foreach (GameObject obj in especiais)
             {
                 Destroy(obj);
             }
 
-            
             Destroy(gameObject);
-            yield break; 
+            yield break;
         }
-        
 
-        
         if (phase2Object != null && health <= originalHealth / 2 && !isPhase2CurrentlyActive)
         {
             StartCoroutine(SwitchToPhase2());
@@ -194,7 +272,6 @@ public class HellBeast : Enemy
         yield return new WaitForSeconds(1f); 
         isTakingDamageCooldown = false;
     }
-
 
     private IEnumerator SwitchToPhase2()
     {
@@ -213,8 +290,6 @@ public class HellBeast : Enemy
         }
         else
         {
-            
-            
             isPhase2CurrentlyActive = false;
             yield break;
         }
@@ -225,4 +300,3 @@ public class HellBeast : Enemy
         yield return null;
     }
 }
-
