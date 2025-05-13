@@ -15,10 +15,10 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
-  - 
+  - Enemy
   - 
   - 
   - 
@@ -54,6 +54,9 @@ TagManager:
   - name: Foreground
     uniqueID: 515375653
     locked: 0
+  - name: Decoration0
+    uniqueID: 1933317541
+    locked: 0
   - name: Ground1
     uniqueID: 3328397717
     locked: 0
@@ -83,6 +86,9 @@ TagManager:
     locked: 0
   - name: Walls
     uniqueID: 1666324489
+    locked: 0
+  - name: Front
+    uniqueID: 2055488779
     locked: 0
   m_RenderingLayers:
   - Default
