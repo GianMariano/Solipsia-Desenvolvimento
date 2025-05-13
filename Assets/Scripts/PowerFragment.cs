@@ -73,6 +73,8 @@ public class PowerFragment : MonoBehaviour
             Debug.Log("Fireball power granted!");
         }
         
+        ColorProgressManager.Instance.CollectFragment();
+
         // Destroi o fragmento de poder
         Destroy(gameObject);
     }
