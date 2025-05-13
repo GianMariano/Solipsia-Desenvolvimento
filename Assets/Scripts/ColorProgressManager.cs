@@ -1,13 +1,13 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ColorProgressManager : MonoBehaviour
 {
     public static ColorProgressManager Instance;
 
-    private int collected = 0;
-    private const int total = 3;
-
-    private SpriteColorRestorer[] restorers;
+    [SerializeField] private Image screenTint;
+    private int fragmentsCollected = 0;
+    private readonly int totalFragments = 3;
 
     private void Awake()
     {
@@ -15,18 +15,24 @@ public class ColorProgressManager : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
+    }
 
-        restorers = FindObjectsOfType<SpriteColorRestorer>();
+    private void Start()
+    {
+        UpdateTint(); // inicializa o escurecimento
     }
 
     public void CollectFragment()
     {
-        collected++;
-        float progress = Mathf.Clamp01((float)collected / total);
+        fragmentsCollected = Mathf.Clamp(fragmentsCollected + 1, 0, totalFragments);
+        UpdateTint();
+    }
 
-        foreach (var restorer in restorers)
-        {
-            restorer.SetColorProgress(progress);
-        }
+    private void UpdateTint()
+    {
+        float alpha = Mathf.Lerp(0.8f, 0f, (float)fragmentsCollected / totalFragments);
+        Color color = screenTint.color;
+        color.a = alpha;
+        screenTint.color = color;
     }
 }

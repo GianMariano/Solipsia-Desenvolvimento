@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class WereWolf : Enemy
 {
@@ -6,6 +7,7 @@ public class WereWolf : Enemy
 
     private BossState currentState = BossState.Idle;
 
+    [Header("Boss Settings")]
     [SerializeField] private Transform leftEdge;
     [SerializeField] private Transform rightEdge;
     [SerializeField] private float stunDuration = 5f;
@@ -17,21 +19,27 @@ public class WereWolf : Enemy
     [SerializeField] private float cameraShakeIntensity = 0.2f;
     [SerializeField] private float cameraShakeDuration = 0.5f;
     [SerializeField] private BoxCollider2D doorCollider;
+
+    [Header("Dialogue Settings")]
+    [SerializeField] private string[] dialogueLines;
+    [SerializeField] private float timeBetweenLines = 2f;
+    [SerializeField] private GameObject dialogueBox;
+    [SerializeField] private TextMeshProUGUI dialogueText;
+
+    private bool isInDialogue = false;
+    private int currentLine = 0;
+    private float dialogueTimer = 0f;
+    private bool battleStarted = false;
+
     private Rigidbody2D rb;
-
-    private float stunTimer;
-    private bool wasGroundedLastFrame = false;
-    bool hasJumped = false;
-
     private Animator animator;
     private Camera mainCamera;
+    private float stunTimer;
+    private bool wasGroundedLastFrame = false;
+    private bool hasJumped = false;
 
-    protected override void Attack()
-    {
-    }
     protected override void Start()
     {
-
         base.Start();
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
@@ -49,9 +57,10 @@ public class WereWolf : Enemy
             }
         }
 
-        base.Update(); // Mantém a lógica de destruição do inimigo e outras coisas da classe Enemy
-  
-    if (health <= 0) return;
+        base.Update();
+        UpdateDialogue();
+
+        if (health <= 0 || isInDialogue || !battleStarted) return;
 
         switch (currentState)
         {
@@ -61,16 +70,12 @@ public class WereWolf : Enemy
 
             case BossState.DashingToLeft:
                 animator.Play("Werewolf_Run");
-
                 transform.position = Vector2.MoveTowards(transform.position,
                     new Vector2(leftEdge.position.x, transform.position.y),
                     speed * Time.deltaTime);
-
                 transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
-
                 if (Vector2.Distance(transform.position, leftEdge.position) < 0.5f)
                 {
-                    Debug.Log("Cheguei no LeftEdge");
                     currentState = BossState.Stunned;
                     stunTimer = stunDuration;
                     ShakeCamera();
@@ -79,16 +84,12 @@ public class WereWolf : Enemy
 
             case BossState.DashingToRight:
                 animator.Play("Werewolf_Run");
-
                 transform.position = Vector2.MoveTowards(transform.position,
                     new Vector2(rightEdge.position.x, transform.position.y),
                     speed * Time.deltaTime);
-
                 transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
-
                 if (Vector2.Distance(transform.position, rightEdge.position) < 0.5f)
                 {
-                    Debug.Log("Cheguei no RightEdge");
                     currentState = BossState.Stunned;
                     stunTimer = stunDuration;
                     ShakeCamera();
@@ -107,7 +108,6 @@ public class WereWolf : Enemy
             case BossState.ReturningToCenter:
                 animator.Play("Werewolf_Run");
                 MoveTo(centerPoint.position);
-
                 if (Vector2.Distance(transform.position, centerPoint.position) < 0.5f)
                 {
                     currentState = BossState.Jumping;
@@ -121,27 +121,91 @@ public class WereWolf : Enemy
                     animator.SetTrigger("Jump");
                     hasJumped = true;
                     JumpTowardsPlayer();
-                    Debug.Log("PULADO");
                 }
 
                 bool isGrounded = IsGrounded();
-                Debug.Log(isGrounded);
-
                 if (isGrounded && !wasGroundedLastFrame)
                 {
-                    Debug.Log("Boss aterrissou");
                     ShakeCamera();
-
                     if (PlayerController.Instance.pState.grounded)
                     {
                         PlayerController.Instance.TakeDamage(damage);
                     }
-
                     hasJumped = false;
                     currentState = DetermineNextDirection();
                 }
+
+                wasGroundedLastFrame = isGrounded;
                 break;
         }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player") && !battleStarted && !isInDialogue)
+        {
+            StartDialogue();
+        }
+    }
+
+    // Dialogue Logic
+    private void StartDialogue()
+    {
+        if (dialogueLines == null || dialogueLines.Length == 0)
+        {
+            StartBattle();
+            return;
+        }
+
+        isInDialogue = true;
+        currentLine = 0;
+        dialogueTimer = timeBetweenLines;
+
+        if (dialogueBox != null) dialogueBox.SetActive(true);
+        ShowCurrentLine();
+    }
+
+    private void ShowCurrentLine()
+    {
+        if (dialogueText != null && currentLine < dialogueLines.Length)
+        {
+            dialogueText.text = dialogueLines[currentLine];
+        }
+    }
+
+    private void UpdateDialogue()
+    {
+        if (!isInDialogue) return;
+
+        dialogueTimer -= Time.deltaTime;
+
+        if (dialogueTimer <= 0)
+        {
+            currentLine++;
+
+            if (currentLine >= dialogueLines.Length)
+            {
+                EndDialogue();
+            }
+            else
+            {
+                ShowCurrentLine();
+                dialogueTimer = timeBetweenLines;
+            }
+        }
+    }
+
+    private void EndDialogue()
+    {
+        isInDialogue = false;
+        if (dialogueBox != null) dialogueBox.SetActive(false);
+        StartBattle();
+    }
+
+    private void StartBattle()
+    {
+        battleStarted = true;
+        currentState = DetermineNextDirection();
     }
 
     private void ShakeCamera()
@@ -198,29 +262,12 @@ public class WereWolf : Enemy
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player") && currentState == BossState.Idle)
-        {
-            currentState = DetermineNextDirection();
-        }
-    }
-
     public override void EnemyHit(float _damageDone)
     {
         base.EnemyHit(_damageDone);
-
-        switch (currentState)
-        {
-            case BossState.Stunned:
-                Debug.Log("Dano crítico - boss está atordoado!");
-                break;
-            default:
-                Debug.Log("Boss levou dano!");
-                break;
-        }
-        
+        if (currentState == BossState.Stunned)
+            Debug.Log("Dano crítico - boss está atordoado!");
+        else
+            Debug.Log("Boss levou dano!");
     }
-
-
 }
