@@ -11,7 +11,6 @@ TagManager:
   - Wall
   - Ground
   - Special
-  - EnemyProjectile
   layers:
   - Default
   - TransparentFX
