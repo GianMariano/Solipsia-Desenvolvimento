@@ -45,6 +45,6 @@ public class Heal : MonoBehaviour
     void FloatEffect()
     {
         float floatY = Mathf.Sin(Time.time * 2f) * 0.05f;
-        transform.position = startPos + new Vector3(0, floatY, 0);
-    }
+        transform.position = startPos + new Vector3(0, floatY, 0);
+    }
 }

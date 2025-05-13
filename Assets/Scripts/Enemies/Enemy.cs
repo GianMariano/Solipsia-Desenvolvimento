@@ -31,6 +31,11 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
+        if (PlayerController.Instance == null || PlayerController.Instance.isDead) 
+        {
+            return;
+        }
+
         if (health <= 0)
         {
             if (moneyManager != null)
@@ -53,15 +58,17 @@ public class Enemy : MonoBehaviour
 
     protected void OnTriggerStay2D(Collider2D _other)
     {
-        if (_other.CompareTag("Player") && !PlayerController.Instance.pState.invincible)
+        if (_other.CompareTag("Player") && !PlayerController.Instance.pState.invincible 
+            && !PlayerController.Instance.isDead && PlayerController.Instance.Health > 0)
         {
             float distanceToPlayer = Vector2.Distance(transform.position, PlayerController.Instance.transform.position);
-            if (distanceToPlayer < 1f) // ajuste
+            if (distanceToPlayer < 1f)
             {
                 Attack();
             }
         }
     }
+
     protected virtual void Attack()
     {
         PlayerController.Instance.TakeDamage(damage);

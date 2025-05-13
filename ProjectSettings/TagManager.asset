@@ -6,9 +6,14 @@ TagManager:
   tags:
   - Item
   - Enemy
+<<<<<<< HEAD
   - Wall
   - Ground
   - Special
+=======
+  - DestructibleObject
+  - Enemy Limiter
+>>>>>>> 440ab9cbde625ebbac43923d2afc5bea80791b89
   layers:
   - Default
   - TransparentFX
@@ -57,6 +62,9 @@ TagManager:
     locked: 0
   - name: ObjectMiddle
     uniqueID: 4042857591
+    locked: 0
+  - name: Ground2
+    uniqueID: 172133731
     locked: 0
   - name: Enemy
     uniqueID: 3143366379

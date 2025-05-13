@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI; 
 
 public class PlayerController : MonoBehaviour
 {
@@ -53,7 +54,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashSpeed = 20f;
     [SerializeField] private float dashDuration = 0.2f;
     [SerializeField] private float dashCooldown = 1f;
+    [SerializeField] private float dashColliderYScale = 0.5f; // How much to reduce collider height (0.5 = half size)
     [Space(5)]
+
+    [Header("Checkpoint Settings")]
+    private Vector3 respawnPosition;
+    private bool checkpointReached = false;
 
     [HideInInspector] public PlayerStateList pState;
     private Rigidbody2D rb;
@@ -66,8 +72,12 @@ public class PlayerController : MonoBehaviour
     private bool isDashing = false;
     private float dashCooldownTimer = 0f;
     private bool canDashNow = true;
+    private BoxCollider2D playerCollider;
+    private Vector2 originalColliderSize;
+    private Vector2 originalColliderOffset;
     public static PlayerController Instance; 
     public GameObject gameOver;
+    public bool isDead = false;
     [SerializeField] private MoneyManager moneyManager;
     
 
@@ -86,17 +96,28 @@ public class PlayerController : MonoBehaviour
     }
     
     void Start()
-    {
+    {   
         pState = GetComponent<PlayerStateList>();
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         healthBar.SetMaxHealth(maxHealth);
+
+        // Get reference to the box collider
+        playerCollider = GetComponent<BoxCollider2D>();
+        if (playerCollider != null)
+        {
+            // Store the original collider size and offset
+            originalColliderSize = playerCollider.size;
+            originalColliderOffset = playerCollider.offset;
+        }
 
         GameObject moneyManagerObj = GameObject.Find("MoneyManager");
         if (moneyManagerObj != null)
         {
             moneyManager = moneyManagerObj.GetComponent<MoneyManager>();
         }
+
+        respawnPosition = transform.position;
     }
 
     private void OnDrawGizmos()
@@ -138,6 +159,7 @@ public class PlayerController : MonoBehaviour
         {
             fireballReady = true;
         }
+
     }
 
     void GetInputs()
@@ -213,12 +235,6 @@ public class PlayerController : MonoBehaviour
                 // Flip the fireball if player is facing left
                 fireball.transform.localScale = new Vector3(-fireball.transform.localScale.x, fireball.transform.localScale.y, fireball.transform.localScale.z);
             }
-            
-
-        }
-        else
-        {
-
         }
     }
 
@@ -276,6 +292,17 @@ public class PlayerController : MonoBehaviour
         // Remove gravity during dash
         rb.gravityScale = 0;
         
+        // Shrink the collider during dash if it exists
+        if (playerCollider != null)
+        {
+            // Reduce the Y size of the collider while keeping the X size
+            playerCollider.size = new Vector2(originalColliderSize.x, originalColliderSize.y * dashColliderYScale);
+            
+            // Adjust the offset to keep the bottom of the collider aligned
+            float offsetY = (originalColliderSize.y - playerCollider.size.y) / 2;
+            playerCollider.offset = new Vector2(originalColliderOffset.x, originalColliderOffset.y - offsetY);
+        }
+        
         // Get dash direction (based on player facing)
         float dashDirection = pState.lookingRight ? 1f : -1f;
         
@@ -285,8 +312,6 @@ public class PlayerController : MonoBehaviour
         // Optional: Make player invincible during dash
         pState.invincible = true;
         
-        // Debug log
-        
         // Wait for dash duration
         yield return new WaitForSeconds(dashDuration);
         
@@ -295,12 +320,17 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = originalGravity;
         pState.invincible = false;
         
+        // Restore original collider size and offset
+        if (playerCollider != null)
+        {
+            playerCollider.size = originalColliderSize;
+            playerCollider.offset = originalColliderOffset;
+        }
     }
 
     public void TakeDamage(float _damage)
     {
-
-        if (pState.invincible) return;
+        if (pState.invincible || isDead) return;
         Health -= Mathf.RoundToInt(_damage);
         StartCoroutine(StopTakingDamage());
         healthBar.SetHealth(health);
@@ -308,19 +338,25 @@ public class PlayerController : MonoBehaviour
 
     public void GainHealth(float _damage)
     {
-
         Health += Mathf.RoundToInt(_damage);
         healthBar.SetHealth(health);
-
     }
 
-    void ShowGameOver()
+    public void RespawnPlayer()
     {
-        if (gameOver != null)
-        {
-            gameOver.SetActive(true); // Ativa a tela de Game Over
-            Time.timeScale = 0f; // Pausa o jogo
-        }
+        transform.position = respawnPosition;
+        Health = maxHealth;
+        healthBar.SetHealth(health);
+        rb.linearVelocity = Vector2.zero; 
+        
+        // Resetar todos os estados importantes
+        isDead = false;
+        pState.invincible = false;
+        
+        // Garantir que as animações sejam resetadas
+        anim.ResetTrigger("Dead");
+        anim.ResetTrigger("TakeDamage");
+        anim.Play("Idle"); // Ou sua animação padrão
     }
 
     IEnumerator StopTakingDamage()
@@ -351,9 +387,12 @@ public class PlayerController : MonoBehaviour
                     onHealthChangedCallback.Invoke();
                 }
             }
-            if (health == 0)
+            if (health == 0 && !isDead)
             {
-                ShowGameOver();
+                isDead = true;
+                GameOverController.Instance.TriggerGameOver();  // Exibe a tela de Game Over 
+                rb.linearVelocity = Vector2.zero;  // Impede qualquer movimento quando morto
+                anim.SetTrigger("Dead");  // Aciona a animação de morte 
             }
         }
     }
@@ -375,13 +414,11 @@ public class PlayerController : MonoBehaviour
             if (Grounded())
             {
                 PerformJump();
-
             }
             // Double jump in air
             else if (!Grounded() && canDoubleJump && jumpCount < 2)
             {
                 PerformJump();
-
             }
         }
 
@@ -412,8 +449,9 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
-    
-
-
+    public void SetCheckpoint(Vector3 newCheckpoint)
+    {
+        respawnPosition = newCheckpoint;
+        checkpointReached = true;
+    }
 }
