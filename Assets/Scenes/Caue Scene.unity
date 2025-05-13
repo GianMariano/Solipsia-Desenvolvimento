@@ -11542,6 +11542,75 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1001 &169945866
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1660289387}
+    m_Modifications:
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.0011129379
+      objectReference: {fileID: 0}
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -14.451393
+      objectReference: {fileID: 0}
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2787798941664759641, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_Name
+      value: Heal 1 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2787798941664759641, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8839821139181162078, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: dialogueBox
+      value: 
+      objectReference: {fileID: 1652507738}
+    - target: {fileID: 8839821139181162078, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+      propertyPath: dialogueText
+      value: 
+      objectReference: {fileID: 1036436767}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
 --- !u!1 &170125265
 GameObject:
   m_ObjectHideFlags: 0
@@ -21878,6 +21947,16 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &312204051 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2787798941664759641, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+  m_PrefabInstance: {fileID: 169945866}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &312204055 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2215546956081925077, guid: 367f434a130d7144eb2e12dcb59a5798, type: 3}
+  m_PrefabInstance: {fileID: 169945866}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &315725052
 GameObject:
   m_ObjectHideFlags: 0
@@ -65343,6 +65422,7 @@ GameObject:
   m_Component:
   - component: {fileID: 945189207}
   - component: {fileID: 945189208}
+  - component: {fileID: 945189209}
   m_Layer: 0
   m_Name: gothic-castle-tileset_11 (3)
   m_TagString: Untagged
@@ -65420,6 +65500,52 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!61 &945189209
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 945189206}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: -0.0135355}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.18, y: 0.66}
+    newSize: {x: 0.18, y: 0.66}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.18, y: 4.4499607}
+  m_EdgeRadius: 0
 --- !u!1 &948672705
 GameObject:
   m_ObjectHideFlags: 0
@@ -102822,7 +102948,7 @@ MonoBehaviour:
   midle: {fileID: 274100280}
   rightEdge: {fileID: 700347852}
   rightMidle: {fileID: 305616541}
-  hellBeastPhase1Object: {fileID: 1759171231}
+  hellBeastScript: {fileID: 0}
 --- !u!1 &1479190800
 GameObject:
   m_ObjectHideFlags: 0
@@ -114860,6 +114986,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 312204055}
   - {fileID: 700347852}
   - {fileID: 827700986}
   - {fileID: 1759171235}
@@ -122925,6 +123052,7 @@ MonoBehaviour:
   damage: 2
   goldGiven: 0
   fireballPrefab: {fileID: 75930997129855657, guid: 540b0e9578abd854495eaf759c1ef957, type: 3}
+  healPrefab: {fileID: 312204051}
   leftEdge: {fileID: 827700986}
   rightEdge: {fileID: 700347852}
   shootPoint: {fileID: 36584740}
@@ -134105,7 +134233,7 @@ Transform:
   m_GameObject: {fileID: 1895329283}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -11.739, y: -22.376, z: 0}
+  m_LocalPosition: {x: -12.9, y: -22.31, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

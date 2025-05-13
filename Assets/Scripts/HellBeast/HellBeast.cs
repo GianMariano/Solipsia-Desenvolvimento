@@ -4,8 +4,10 @@ using System.Collections;
 public class HellBeast : Enemy
 {
     public GameObject fireballPrefab;
+    public GameObject healPrefab;
     public Transform leftEdge;
     public Transform rightEdge;
+    public Transform midle;
     public Transform shootPoint;
     private Animator animator;
     private float originalHealth;
@@ -17,12 +19,17 @@ public class HellBeast : Enemy
     private bool isPhase2Active = false;
 
     public GameObject phase2Object;
+    private bool isTakingDamageCooldown = false;
 
     void Start()
     {
         animator = GetComponent<Animator>();
         originalHealth = health;
-        phase1Routine = StartCoroutine(AttackCycle1());
+        // phase1Routine = StartCoroutine(AttackCycle1());
+        StartCoroutine(BecomeVulnerable(5f));
+
+        if (healPrefab != null)
+            healPrefab.SetActive(false);
     }
 
     IEnumerator AttackCycle1()
@@ -99,7 +106,12 @@ public class HellBeast : Enemy
     {
         isInvulnerable = false;
         animator.SetTrigger("isStunned");
+
+        if (healPrefab != null)
+            healPrefab.SetActive(true);
+
         yield return new WaitForSeconds(flashDuration);
+
         animator.SetTrigger("isStunned");
         isInvulnerable = true;
     }
@@ -111,33 +123,47 @@ public class HellBeast : Enemy
 
     public override void EnemyHit(float _damageDone)
     {
-        if (!isInvulnerable)
+        if (!isInvulnerable && !isTakingDamageCooldown)
         {
-            Debug.Log("DANO TOMADO");
-            Debug.Log(_damageDone);
-            health -= _damageDone;
-            base.EnemyHit(_damageDone);
-
-            if (health <= originalHealth / 2 && !isPhase2Active)
-            {
-                StartCoroutine(SwitchToPhase2());
-            }
+            StartCoroutine(DamageCooldownRoutine(_damageDone));
         }
+    }
+
+    private IEnumerator DamageCooldownRoutine(float damage)
+    {
+        isTakingDamageCooldown = true;
+
+        health -= damage;
+        base.EnemyHit(damage);
+
+        Debug.Log(isPhase2Active);
+        if (health <= originalHealth / 2 && !isPhase2Active)
+        {
+            StartCoroutine(SwitchToPhase2());
+        }
+
+        yield return new WaitForSeconds(1f);
+        isTakingDamageCooldown = false;
     }
 
     private IEnumerator SwitchToPhase2()
     {
+        Debug.Log("chamado");
         isPhase2Active = true;
 
         if (phase1Routine != null)
             StopCoroutine(phase1Routine);
+        Debug.Log("é aqui certeza");
 
         HellBeastPhase2 phase2Script = phase2Object.GetComponent<HellBeastPhase2>();
         phase2Script.hellBeastScript = this;
 
         phase2Object.SetActive(true);
         gameObject.SetActive(false);
+        
+        Debug.Log("CARALHO");
+        isPhase2Active = false;
 
-        yield return null; 
+        yield return null;
     }
 }
