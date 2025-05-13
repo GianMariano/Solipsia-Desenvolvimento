@@ -75,7 +75,6 @@ public class PowerFragment : MonoBehaviour
         
         ColorProgressManager.Instance.CollectFragment();
 
-        MusicManager.Instance.PlayNormalMusic();
         // Destroi o fragmento de poder
         Destroy(gameObject);
     }
