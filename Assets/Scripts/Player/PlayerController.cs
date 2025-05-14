@@ -429,7 +429,7 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("Jumping", !Grounded());
     }
 
-    void PerformJump()
+    protected void PerformJump()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         jumpCount++;
