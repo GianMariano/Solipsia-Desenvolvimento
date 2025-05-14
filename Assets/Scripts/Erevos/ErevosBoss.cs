@@ -195,7 +195,6 @@ public class ErevosBoss : Enemy
     // Se o jogador escolheu NÃO, a batalha começa
         Debug.Log("Jogador escolheu NÃO. Iniciando a batalha...");
         ShowChoiceButtons(false);
-        // Aqui você pode iniciar a batalha ou executar outra lógica que deseja
         ActivateBoss();
     }
     private void SimulateButtonClick(Button button)
@@ -450,20 +449,22 @@ public class ErevosBoss : Enemy
         col.enabled = false;
     }
 
+    SceneManager.LoadScene("GoodEnding");
+
     // Verifica se o whiteFadeController não é nulo antes de usá-lo
-    if (whiteFadeController != null)
-    {
+    //if (whiteFadeController != null)
+    //{
         // Inicia o efeito de fade branco e carrega a cena GoodEnding
-        StartCoroutine(whiteFadeController.StartWhiteFadeEffect(() =>
-        {
+    //    StartCoroutine(whiteFadeController.StartWhiteFadeEffect(() =>
+      //  {
             // Adiciona uma pequena pausa antes de carregar a cena (opcional, para garantir que o fade aconteça primeiro)
-            SceneManager.LoadScene("GoodEnding");
-        }));
-    }
-    else
-    {
-        Debug.LogError("WhiteFadeController não foi atribuído ao ErevosBoss!");
-    }
+        //    SceneManager.LoadScene("GoodEnding");
+        //}));
+    //}
+    //else
+    //{
+    //    Debug.LogError("WhiteFadeController não foi atribuído ao ErevosBoss!");
+    //}
 
     // Destrói o GameObject
     //Destroy(gameObject);
