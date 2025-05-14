@@ -1,16 +1,19 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 using System.Collections;
-using TMPro; // Namespace para TextMeshPro
 
 public class GameOverController : MonoBehaviour
 {
     public static GameOverController Instance;
 
-    public TextMeshProUGUI gameOverText; // Mudado para TextMeshProUGUI
+    public GameObject gameOverPanel;
+    public TextMeshProUGUI gameOverText;
+    public Button continuarButton;
+    public Button desistirButton;
     public PlayerController player;
-    public float waitBeforeFadeIn = 0.5f;
-    public float waitAfterText = 1.5f;
+    public float fadeDuration = 1f;
 
     private void Awake()
     {
@@ -19,8 +22,7 @@ public class GameOverController : MonoBehaviour
         else
             Destroy(gameObject);
 
-        if (gameOverText != null)
-            gameOverText.color = new Color(1, 1, 1, 0);
+        gameOverPanel.SetActive(false);
     }
 
     public void TriggerGameOver()
@@ -32,46 +34,35 @@ public class GameOverController : MonoBehaviour
     {
         player.isDead = true;
         player.pState.invincible = true;
-        
+
         yield return StartCoroutine(FadeManager.Instance.FadeOut());
-        yield return new WaitForSeconds(waitBeforeFadeIn);
 
-        if (gameOverText != null)
+        gameOverPanel.SetActive(true);
+
+        continuarButton.onClick.RemoveAllListeners();
+        desistirButton.onClick.RemoveAllListeners();
+
+        continuarButton.onClick.AddListener(() =>
         {
-            yield return StartCoroutine(FadeInText(gameOverText));
-            yield return new WaitForSeconds(waitAfterText);
-            yield return StartCoroutine(FadeOutText(gameOverText));
-        }
+            gameOverPanel.SetActive(false);
+            StartCoroutine(RespawnSequence());
+        });
 
-        player.RespawnPlayer(); 
+        desistirButton.onClick.AddListener(() =>
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("Desistencia");
+        });
+    }
+
+    private IEnumerator RespawnSequence()
+    {
+        yield return new WaitForSeconds(0.2f);
+        player.RespawnPlayer();
+
         yield return StartCoroutine(FadeManager.Instance.FadeIn());
-        
+
         player.isDead = false;
         player.pState.invincible = false;
-    }
-
-    // Métodos atualizados para usar TextMeshProUGUI
-    private IEnumerator FadeInText(TextMeshProUGUI text)
-    {
-        float t = 0f;
-        Color c = text.color;
-        while (t < 1f)
-        {
-            t += Time.deltaTime;
-            text.color = new Color(c.r, c.g, c.b, Mathf.Lerp(0, 1, t));
-            yield return null;
-        }
-    }
-
-    private IEnumerator FadeOutText(TextMeshProUGUI text)
-    {
-        float t = 0f;
-        Color c = text.color;
-        while (t < 1f)
-        {
-            t += Time.deltaTime;
-            text.color = new Color(c.r, c.g, c.b, Mathf.Lerp(1, 0, t));
-            yield return null;
-        }
     }
 }
