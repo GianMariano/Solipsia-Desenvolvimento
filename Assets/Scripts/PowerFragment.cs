@@ -15,12 +15,18 @@ public class PowerFragment : MonoBehaviour
     [SerializeField] private float minScale = 0.9f;
     [SerializeField] private float maxScale = 1.1f;
     [SerializeField] private float pulseSpeed = 2.0f;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip collectSound;
+    private AudioSource audioSource;
     
     private Vector3 originalScale;
+    [SerializeField] private GameObject floatingTextPrefab;
 
     private void Start()
     {
         originalScale = transform.localScale;
+        audioSource = GetComponent<AudioSource>();
     }
     
     private void Update()
@@ -43,8 +49,11 @@ public class PowerFragment : MonoBehaviour
     {
         // Desativa o collider para evitar múltiplas coletas
         GetComponent<Collider2D>().enabled = false;
-        
-        // Play collection effect if assigned
+       
+       if (collectSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(collectSound);
+        }
         if (collectEffect != null)
         {
             Instantiate(collectEffect, transform.position, Quaternion.identity);
@@ -54,30 +63,42 @@ public class PowerFragment : MonoBehaviour
         yield return WhiteFadeController.Instance.StartWhiteFadeEffect(() => {
             player.RespawnPlayer();
         });
-        // Concede os poderes
+        
         if (grantDash)
         {
             player.canDash = true;
             Debug.Log("Dash power granted!");
+            ShowFloatingText(player, "Dash Desbloqueado! (F)");
+            Debug.Log("Texto flutuante instanciado!");
         }
         
         if (grantDoubleJump)
         {
             player.canDoubleJump = true;
             Debug.Log("Double Jump power granted!");
+            ShowFloatingText(player, "Pulo Duplo Desbloqueado! (Espaço)");
         }
         
         if (grantShoot)
         {
             player.canShoot = true;
             Debug.Log("Fireball power granted!");
+            ShowFloatingText(player, "Magia de Fogo Desbloqueada! (Mouse2)");
         }
         
         ColorProgressManager.Instance.CollectFragment();
 
-        MusicManager.Instance.PlayNormalMusic();
+        
 
-        // Destroi o fragmento de poder
         Destroy(gameObject);
+    }
+
+    private void ShowFloatingText(PlayerController player, string message)
+    {
+        if (floatingTextPrefab != null)
+        {
+            GameObject textObj = Instantiate(floatingTextPrefab);
+            textObj.GetComponent<FloatingText>().Initialize(player.transform, message);
+        }
     }
 }

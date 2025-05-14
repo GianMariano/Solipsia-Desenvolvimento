@@ -19,18 +19,18 @@ public class PlayerController : MonoBehaviour
     [Space(5)]
 
     [Header("Attack Settings:")]
-    [SerializeField] private Transform SideAttackTransform; //the middle of the side attack area
-    [SerializeField] private Vector2 SideAttackArea; //how large the area of side attack is
+    [SerializeField] private Transform SideAttackTransform; 
+    [SerializeField] private Vector2 SideAttackArea; 
     [SerializeField] private float timeBetweenAttack;
-    [SerializeField] private LayerMask attackableLayer; //the layer the player can attack and recoil off of
-    [SerializeField] private float damage; //the damage the player does to an enemy
+    [SerializeField] private LayerMask attackableLayer; 
+    [SerializeField] private float damage; 
     private float timeSinceAttack;
     private bool attack = false;
     [Space(5)]
 
     [Header("Fireball Settings:")]
-    [SerializeField] private GameObject fireballPrefab; // Assign this in Inspector
-    [SerializeField] private Transform fireballSpawnPoint; // Create an empty child object as spawn point
+    [SerializeField] private GameObject fireballPrefab; 
+    [SerializeField] private Transform fireballSpawnPoint; 
     [SerializeField] private float fireballCooldown = 0.5f;
     private float fireballCooldownTimer = 0f;
     private bool fireballReady = true;
@@ -60,15 +60,26 @@ public class PlayerController : MonoBehaviour
     [Header("Checkpoint Settings")]
     private Vector3 respawnPosition;
     private bool checkpointReached = false;
+    [Space(5)]
+
+    [Header("Audio Settings:")]
+    [SerializeField] private AudioClip jumpSound;
+    [SerializeField] private AudioClip dashSound;
+    [SerializeField] private AudioClip shootSound;
+    [SerializeField] private AudioClip attackSound;
+    [SerializeField] private AudioClip hurtSound;
+    [SerializeField] private AudioClip walkSound;
+    [SerializeField] private AudioClip collectSound;
+    private AudioSource audioSource;
 
     [HideInInspector] public PlayerStateList pState;
     private Rigidbody2D rb;
     private Animator anim;
     private float xAxis, yAxis;
     private float gravity;
-    private int jumpCount = 0; // Simple counter for jumps
+    private int jumpCount = 0; 
     private bool shoot = false;
-    private bool jumpButtonPressedLastFrame = false; // Track button state
+    private bool jumpButtonPressedLastFrame = false; 
     private bool isDashing = false;
     private float dashCooldownTimer = 0f;
     private bool canDashNow = true;
@@ -101,6 +112,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         healthBar.SetMaxHealth(maxHealth);
+        audioSource = GetComponent<AudioSource>();
 
         // Get reference to the box collider
         playerCollider = GetComponent<BoxCollider2D>();
@@ -174,6 +186,11 @@ public class PlayerController : MonoBehaviour
     {
         rb.linearVelocity = new Vector2(walkSpeed * xAxis, rb.linearVelocity.y);
         anim.SetBool("Walking", rb.linearVelocity.x != 0 && Grounded());
+
+        if (Grounded() && Mathf.Abs(rb.linearVelocity.x) > 0.1f && !audioSource.isPlaying)
+        {
+            audioSource.PlayOneShot(walkSound);
+        }
     }
 
     public bool Grounded()
@@ -207,7 +224,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckFireball()
     {
-        // Check if player can shoot and right mouse button is pressed
+        
         if (shoot && canShoot && fireballReady)
         {
             ShootFireball();
@@ -216,23 +233,24 @@ public class PlayerController : MonoBehaviour
 
     void ShootFireball()
     {
-        // Set cooldown
+        
         fireballReady = false;
         fireballCooldownTimer = fireballCooldown;
         
-        // Determine the direction based on player facing
+        
         Vector3 fireballDirection = pState.lookingRight ? Vector3.right : Vector3.left;
         
-        // Create the fireball
+        audioSource.PlayOneShot(shootSound);
+        
         if (fireballSpawnPoint != null && fireballPrefab != null)
         {
-            // Instantiate the fireball at the spawn point
+            
             GameObject fireball = Instantiate(fireballPrefab, fireballSpawnPoint.position, Quaternion.identity);
             
-            // Set the fireball's direction based on player facing
+            
             if (!pState.lookingRight)
             {
-                // Flip the fireball if player is facing left
+                
                 fireball.transform.localScale = new Vector3(-fireball.transform.localScale.x, fireball.transform.localScale.y, fireball.transform.localScale.z);
             }
         }
@@ -244,6 +262,7 @@ public class PlayerController : MonoBehaviour
         if (attack && timeSinceAttack >= timeBetweenAttack)
         {
             timeSinceAttack = 0;
+            audioSource.PlayOneShot(attackSound);
             anim.SetTrigger("Attacking");
 
             if (yAxis == 0 || yAxis < 0 && Grounded())
@@ -272,7 +291,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckDash()
     {
-        // Check for F key press to trigger dash
+        
         if (Input.GetKeyDown(KeyCode.F) && canDash && canDashNow && !isDashing)
         {
             StartCoroutine(Dash());
@@ -281,46 +300,47 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator Dash()
     {
-        // Set dash state and reset cooldown
+        
+        audioSource.PlayOneShot(dashSound);
         isDashing = true;
         canDashNow = false;
         dashCooldownTimer = dashCooldown;
         
-        // Store original gravity
+        
         float originalGravity = rb.gravityScale;
         
-        // Remove gravity during dash
+        
         rb.gravityScale = 0;
         
-        // Shrink the collider during dash if it exists
+        
         if (playerCollider != null)
         {
-            // Reduce the Y size of the collider while keeping the X size
+            
             playerCollider.size = new Vector2(originalColliderSize.x, originalColliderSize.y * dashColliderYScale);
             
-            // Adjust the offset to keep the bottom of the collider aligned
+            
             float offsetY = (originalColliderSize.y - playerCollider.size.y) / 2;
             playerCollider.offset = new Vector2(originalColliderOffset.x, originalColliderOffset.y - offsetY);
         }
         
-        // Get dash direction (based on player facing)
+        
         float dashDirection = pState.lookingRight ? 1f : -1f;
         
-        // Apply dash force
+        
         rb.linearVelocity = new Vector2(dashDirection * dashSpeed, 0);
         
-        // Optional: Make player invincible during dash
+        
         pState.invincible = true;
         
-        // Wait for dash duration
+        
         yield return new WaitForSeconds(dashDuration);
         
-        // Reset everything post-dash
+        
         isDashing = false;
         rb.gravityScale = originalGravity;
         pState.invincible = false;
         
-        // Restore original collider size and offset
+        
         if (playerCollider != null)
         {
             playerCollider.size = originalColliderSize;
@@ -331,6 +351,7 @@ public class PlayerController : MonoBehaviour
     public void TakeDamage(float _damage)
     {
         if (pState.invincible || isDead) return;
+        audioSource.PlayOneShot(hurtSound);
         Health -= Mathf.RoundToInt(_damage);
         StartCoroutine(StopTakingDamage());
         healthBar.SetHealth(health);
@@ -414,11 +435,13 @@ public class PlayerController : MonoBehaviour
             if (Grounded())
             {
                 PerformJump();
+                audioSource.PlayOneShot(jumpSound);
             }
             // Double jump in air
             else if (!Grounded() && canDoubleJump && jumpCount < 2)
             {
                 PerformJump();
+                audioSource.PlayOneShot(jumpSound);
             }
         }
 
@@ -437,15 +460,37 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Item"))
+        if (collision.CompareTag("Cooper"))
         {
             // Destroi o item
             Destroy(collision.gameObject);
-
-            // Adiciona dinheiro (você precisará acessar o PointManager)
+            audioSource.PlayOneShot(collectSound);
+            
             if (moneyManager != null)
             {
                 moneyManager.UpdateMoney(100);
+            }
+        }
+        else if (collision.CompareTag("Silver"))
+        {
+            
+            Destroy(collision.gameObject);
+            audioSource.PlayOneShot(collectSound);
+            
+            if (moneyManager != null)
+            {
+                moneyManager.UpdateMoney(300);
+            }
+        }
+        else if (collision.CompareTag("Gold"))
+        {
+            
+            Destroy(collision.gameObject);
+            audioSource.PlayOneShot(collectSound);
+            
+            if (moneyManager != null)
+            {
+                moneyManager.UpdateMoney(500);
             }
         }
     }

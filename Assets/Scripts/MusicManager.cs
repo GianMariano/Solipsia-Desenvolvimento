@@ -1,26 +1,50 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class MusicManager : MonoBehaviour
 {
     public static MusicManager Instance;
 
-    public AudioClip normalMusicClip;
-    public AudioClip bossMusicClip;
+    [System.Serializable]
+    public class AreaMusic
+    {
+        public string areaName;
+        public AudioClip musicClip;
+    }
+
+    [System.Serializable]
+    public class BossMusic
+    {
+        public string bossName;
+        public AudioClip musicClip;
+    }
+
+    [Header("Area Music")]
+    public List<AreaMusic> areaMusics = new List<AreaMusic>();
+    public AudioClip defaultAreaMusic;
+
+    [Header("Boss Music")]
+    public List<BossMusic> bossMusics = new List<BossMusic>();
+    public AudioClip defaultBossMusic;
 
     [Range(0f, 1f)]
     public float musicVolume = 0.3f;
 
     private AudioSource audioSource;
+    private string currentArea;
+    private string currentBoss;
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-
+            DontDestroyOnLoad(gameObject);
+            
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.loop = true;
             audioSource.playOnAwake = false;
+            audioSource.volume = musicVolume;
         }
         else
         {
@@ -28,23 +52,67 @@ public class MusicManager : MonoBehaviour
         }
     }
 
-    private void Start()
+    public void PlayAreaMusic(string areaName)
     {
-        PlayNormalMusic(); // Isso toca a música normal com volume aplicado
+        currentArea = areaName;
+        AudioClip clipToPlay = defaultAreaMusic;
+
+        foreach (AreaMusic area in areaMusics)
+        {
+            if (area.areaName == areaName)
+            {
+                clipToPlay = area.musicClip;
+                break;
+            }
+        }
+
+        if (clipToPlay != null && audioSource.clip != clipToPlay)
+        {
+            audioSource.clip = clipToPlay;
+            audioSource.Play();
+        }
     }
 
-    public void PlayNormalMusic()
+    public void PlayBossMusic(string bossName)
     {
-        audioSource.clip = normalMusicClip;
-        audioSource.volume = musicVolume; // GARANTIR que o volume é aplicado
-        audioSource.Play();
+        currentBoss = bossName;
+        AudioClip clipToPlay = defaultBossMusic;
+
+        foreach (BossMusic boss in bossMusics)
+        {
+            if (boss.bossName == bossName)
+            {
+                clipToPlay = boss.musicClip;
+                break;
+            }
+        }
+
+        if (clipToPlay != null)
+        {
+            audioSource.clip = clipToPlay;
+            audioSource.Play();
+        }
     }
 
-    public void PlayBossMusic()
+    public void ReturnToAreaMusic()
     {
-        audioSource.clip = bossMusicClip;
-        audioSource.volume = musicVolume;
-        audioSource.Play();
+        if (!string.IsNullOrEmpty(currentArea))
+        {
+            PlayAreaMusic(currentArea);
+        }
+        else
+        {
+            PlayDefaultMusic();
+        }
+    }
+
+    public void PlayDefaultMusic()
+    {
+        if (defaultAreaMusic != null)
+        {
+            audioSource.clip = defaultAreaMusic;
+            audioSource.Play();
+        }
     }
 
     public void SetVolume(float volume)

@@ -40,6 +40,9 @@ public class ErevosBoss : Enemy
     [Header("Fade")]
     [SerializeField] private WhiteFadeController whiteFadeController;  // Referência para o fade branco
 
+    [Header("Áudio")]
+    [SerializeField] private AudioSource bossMusicSource;
+
     private Animator animator;
     private bool isAttacking = false;
     private bool isMoving = false;
@@ -187,7 +190,9 @@ public class ErevosBoss : Enemy
     {
         // Se o jogador escolheu SIM, vai para a cena BadEnding
         Debug.Log("Jogador escolheu SIM. Indo para BadEnding...");
+        FindFirstObjectByType<BossArenaTrigger>()?.StopBossMusic();
         SceneManager.LoadScene("BadEnding");
+        
     }
 
     public void ChooseNo()
@@ -441,6 +446,7 @@ public class ErevosBoss : Enemy
     isMoving = false;
 
     Debug.Log("Boss morreu!");
+    FindFirstObjectByType<BossArenaTrigger>()?.StopBossMusic();
 
     // Desativa os colliders
     Collider2D[] colliders = GetComponentsInChildren<Collider2D>();

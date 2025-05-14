@@ -12,6 +12,9 @@ TagManager:
   - Ground
   - Special
   - EnemyProjectile
+  - Silver
+  - Cooper
+  - Gold
   layers:
   - Default
   - TransparentFX
