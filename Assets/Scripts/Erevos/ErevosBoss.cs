@@ -449,22 +449,20 @@ public class ErevosBoss : Enemy
         col.enabled = false;
     }
 
-    SceneManager.LoadScene("GoodEnding");
-
     // Verifica se o whiteFadeController não é nulo antes de usá-lo
-    //if (whiteFadeController != null)
-    //{
+    if (WhiteFadeController.Instance != null)
+    {
         // Inicia o efeito de fade branco e carrega a cena GoodEnding
-    //    StartCoroutine(whiteFadeController.StartWhiteFadeEffect(() =>
-      //  {
+        StartCoroutine(WhiteFadeController.Instance.StartWhiteFadeEffect(() =>
+        {
             // Adiciona uma pequena pausa antes de carregar a cena (opcional, para garantir que o fade aconteça primeiro)
-        //    SceneManager.LoadScene("GoodEnding");
-        //}));
-    //}
-    //else
-    //{
-    //    Debug.LogError("WhiteFadeController não foi atribuído ao ErevosBoss!");
-    //}
+            SceneManager.LoadScene("GoodEnding");
+        }));
+    }
+    else
+    {
+        Debug.LogError("WhiteFadeController não foi atribuído ao ErevosBoss!");
+    }
 
     // Destrói o GameObject
     //Destroy(gameObject);
