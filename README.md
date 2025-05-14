@@ -5,7 +5,7 @@ Trabalho de Desenvolvimento de Jogos apresentado ao Centro Universitário [FEI](
 
 ## Link para a Gameplay: https://drive.google.com/drive/folders/1tl0gnnpC9kXR3znvPIX2ImVhKZs1AaeK?usp=drive_link
 
-# Link para o Manual do Jogo: https://www.canva.com/design/DAGm5700wDU/hLSTLAfBjZ2zu2-l46__kw/edit?utm_content=DAGm5700wDU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+## Link para o Manual do Jogo: https://www.canva.com/design/DAGm5700wDU/hLSTLAfBjZ2zu2-l46__kw/edit?utm_content=DAGm5700wDU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 ## Componentes do Grupo
 
