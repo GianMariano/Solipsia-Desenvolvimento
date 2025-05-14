@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/GoodEnding.unity
     guid: 942dc2b1af59c0e4a8c5743bab146da8
+  - enabled: 1
+    path: Assets/Scenes/Desistencia.unity
+    guid: 12b4277383bb11d4f993a1d0514b9fa1
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
