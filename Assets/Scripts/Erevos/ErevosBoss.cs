@@ -1,9 +1,23 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;  // Para carregar a cena
 using System.Collections;
+using UnityEngine.UI; // Para usar os botões
 
 public class ErevosBoss : Enemy
 {
+    [Header("Dialogue Settings")]
+    [SerializeField] private string[] dialogueLines;
+    [SerializeField] private float timeBetweenLines = 2f;
+    [SerializeField] private GameObject dialogueBox; // Referência a um objeto UI de diálogo
+    [SerializeField] private TMPro.TextMeshProUGUI dialogueText; // Componente de texto
+    private bool isInDialogue = false;
+    private int currentLine = 0;
+    private float dialogueTimer = 0f;
+
+    [Header("Choices")]
+    [SerializeField] private Button yesButton; // Botão SIM
+    [SerializeField] private Button noButton;  // Botão NÃO
+
     [Header("Sistema de Vida")]
     [SerializeField] private float bossHealth = 100f;
     [SerializeField] private float maxBossHealth = 100f;
@@ -35,6 +49,8 @@ public class ErevosBoss : Enemy
     private bool isTakingDamageCooldown = false;
     private bool bossActivated = false; // Nova flag para controlar a ativação do boss
     private Coroutine attackPatternCoroutine; // Referência para a coroutine do padrão de ataque
+    private bool choiceMade = false;
+    
     
     protected override void Start()
     {
@@ -89,6 +105,107 @@ public class ErevosBoss : Enemy
         }
     }
 
+    public void StartDialogue()
+    {
+        if (dialogueLines == null || dialogueLines.Length == 0)
+        {
+            ActivateBoss();
+            return;
+        }
+
+        isInDialogue = true;
+        currentLine = 0;
+        dialogueTimer = timeBetweenLines;
+        
+        // Ativa a caixa de diálogo e mostra a primeira linha
+        if (dialogueBox != null) dialogueBox.SetActive(true);
+        ShowCurrentLine();
+    }
+
+    private void ShowCurrentLine()
+    {
+        if (dialogueText != null && currentLine < dialogueLines.Length)
+        {
+            dialogueText.text = dialogueLines[currentLine];
+        }
+    }
+
+    public void UpdateDialogue()
+    {
+        if (!isInDialogue) return;
+
+        dialogueTimer -= Time.deltaTime;
+        
+        if (dialogueTimer <= 0)
+        {
+            currentLine++;
+            
+            if (currentLine >= dialogueLines.Length)
+            {
+                EndDialogue();
+            }
+            else
+            {
+                ShowCurrentLine();
+                dialogueTimer = timeBetweenLines;
+            }
+        }
+    }
+
+    private void EndDialogue()
+    {
+        isInDialogue = false;
+        if (dialogueBox != null) dialogueBox.SetActive(false);
+        choiceMade = true;  
+    }
+    
+    private void ShowChoiceButtons(bool show)
+    {
+        if (yesButton != null && noButton != null)
+        {
+            yesButton.gameObject.SetActive(show);
+            noButton.gameObject.SetActive(show);
+
+            // Adiciona os listeners para os botões
+            yesButton.onClick.RemoveAllListeners();
+            noButton.onClick.RemoveAllListeners();
+
+            if (show)
+            {
+                yesButton.onClick.AddListener(ChooseYes);
+                noButton.onClick.AddListener(ChooseNo);
+            }
+            else
+            {
+                yesButton.onClick.RemoveListener(ChooseYes);
+                noButton.onClick.RemoveListener(ChooseNo);
+            }   
+        }
+    }
+
+    public void ChooseYes()
+    {
+        // Se o jogador escolheu SIM, vai para a cena BadEnding
+        Debug.Log("Jogador escolheu SIM. Indo para BadEnding...");
+        SceneManager.LoadScene("BadEnding");
+    }
+
+    public void ChooseNo()
+    {
+    // Se o jogador escolheu NÃO, a batalha começa
+        Debug.Log("Jogador escolheu NÃO. Iniciando a batalha...");
+        ShowChoiceButtons(false);
+        // Aqui você pode iniciar a batalha ou executar outra lógica que deseja
+        ActivateBoss();
+    }
+    private void SimulateButtonClick(Button button)
+    {
+        if (button != null)
+        {
+            button.onClick.Invoke();  // Simula o clique no botão
+        }
+    }
+
     // Método chamado quando o player entrar na área do trigger
     public void ActivateBoss()
     {
@@ -99,7 +216,7 @@ public class ErevosBoss : Enemy
             
             attackPatternCoroutine = StartCoroutine(MovementPattern());
         }
-    }
+    }    
 
     public override void EnemyHit(float damageAmount)
     {
@@ -144,6 +261,24 @@ public class ErevosBoss : Enemy
 
     private void Update()
     {
+        UpdateDialogue();
+
+        if (choiceMade) 
+        {
+            ShowChoiceButtons(true);
+
+            if (Input.GetKeyDown(KeyCode.Y))
+            {
+                SimulateButtonClick(yesButton);  // Simula o clique no botão SIM
+                choiceMade = false;
+            }
+            else if (Input.GetKeyDown(KeyCode.N))
+            {
+                SimulateButtonClick(noButton);   // Simula o clique no botão NÃO
+                choiceMade = false;
+            }
+        }
+
         if (isMoving && !isDead)
         {
             MoveTowardsDestination();
@@ -331,7 +466,7 @@ public class ErevosBoss : Enemy
     }
 
     // Destrói o GameObject
-    // Destroy(gameObject);
+    //Destroy(gameObject);
 }
 
     public void ForceAttack(int rajadas = 1)
@@ -363,7 +498,7 @@ public class BossTriggerArea : MonoBehaviour
             
             if (boss != null)
             {
-                boss.ActivateBoss();
+                boss.StartDialogue();
             }
             
             Debug.Log("Player entrou na área do boss!");
