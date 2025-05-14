@@ -1,92 +1,163 @@
 using UnityEngine;
 using System.Collections;
 
-public class ErevosBoss : MonoBehaviour
+public class ErevosBoss : Enemy
 {
-    [Header("Atributos Básicos")]
-    [SerializeField] private float health = 100f;
-    [SerializeField] private float maxHealth = 100f;
-    [SerializeField] private float damage = 2f;
-    [SerializeField] private int goldReward = 500;
-    
-    [Header("Estado do Boss")]
-    [SerializeField] private bool isInvulnerable = true;
-    [SerializeField] private bool isPhase2 = false;
-    [SerializeField] private float phaseTransitionHealthPercent = 0.5f;
+    [Header("Sistema de Vida")]
+    [SerializeField] private float bossHealth = 100f;
+    [SerializeField] private float maxBossHealth = 100f;
+    [SerializeField] private bool isInvulnerable = true; // Começa invulnerável
     
     [Header("Posicionamento")]
     [SerializeField] private Transform leftEdge;
     [SerializeField] private Transform rightEdge;
     [SerializeField] private Transform midPoint;
+    [SerializeField] private Transform triggerAreaObject; // Objeto que contém o trigger de ativação
     
     [Header("Movimentação")]
-    [SerializeField] private float walkSpeed = 3f;
-    [SerializeField] private float runSpeed = 5f; // Velocidade maior para fase 2
-    [SerializeField] private float closeRangeDistance = 2f; // Distância considerada "perto" do player
-    [SerializeField] private bool canMove = true;
-    [SerializeField] private float distanceThreshold = 0.1f; // Distância mínima para considerar chegada ao destino
+    [SerializeField] private float moveSpeed = 3f;
+    [SerializeField] private float distanceThreshold = 0.1f;
     
     [Header("Ataques")]
     [SerializeField] private ErevosFireball fireballAttack;
-    [SerializeField] private float basicAttackCooldown = 3f;
-    [SerializeField] private float specialAttackCooldown = 8f;
-    [SerializeField] private float vulnerableDuration = 5f;
-    [SerializeField] private bool canAttack = true;
-    
-    [Header("Efeitos")]
-    [SerializeField] private GameObject vulnerableVisualEffect;
-    [SerializeField] private GameObject phaseTransitionEffect;
-    [SerializeField] private GameObject deathEffect;
-    [SerializeField] private GameObject hitEffect;
+    [SerializeField] private float attackCooldown = 3f;
     
     private Animator animator;
-    private bool isTakingDamageCooldown = false;
     private bool isAttacking = false;
-    private Coroutine currentAttackRoutine;
     private bool isMoving = false;
     private Vector3 currentDestination;
-    private MoneyManager moneyManager;
+    private SpriteRenderer spriteRenderer;
     private bool isDead = false;
-    private bool isStunned = false;
+    private bool isTakingDamageCooldown = false;
+    private bool bossActivated = false; // Nova flag para controlar a ativação do boss
+    private Coroutine attackPatternCoroutine; // Referência para a coroutine do padrão de ataque
     
-    private void Awake()
+    protected override void Start()
     {
-        animator = GetComponent<Animator>();
+        // Não chama base.Start() para evitar conflitos com a classe Enemy
         
-        // Se o fireballAttack não foi configurado no inspector, procure no filho
+        animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        
         if (fireballAttack == null)
             fireballAttack = GetComponentInChildren<ErevosFireball>(true);
+            
+        // NÃO inicia o padrão de ataque - esperamos a ativação pelo trigger
+        
+        // Configura o trigger de ativação
+        SetupTriggerArea();
+        
+        Debug.Log("ErevosBoss inicializado. Esperando player entrar na área para começar a atacar.");
     }
     
-    private void Start()
+    private void SetupTriggerArea()
     {
-        // Tenta encontrar o MoneyManager na cena
-        GameObject moneyManagerObj = GameObject.Find("MoneyManager");
-        if (moneyManagerObj != null)
+        // Se não tiver um trigger definido, cria um
+        if (triggerAreaObject == null)
         {
-            moneyManager = moneyManagerObj.GetComponent<MoneyManager>();
+            // Criar objeto para o trigger
+            GameObject triggerObject = new GameObject("BossTriggerArea");
+            triggerObject.transform.position = transform.position;
+            triggerObject.transform.parent = transform.parent; // Mesmo parent do boss
+            
+            // Adiciona um BoxCollider2D como trigger
+            BoxCollider2D triggerCollider = triggerObject.AddComponent<BoxCollider2D>();
+            triggerCollider.isTrigger = true;
+            triggerCollider.size = new Vector2(10f, 5f); // Tamanho da área de trigger - ajuste conforme necessário
+            
+            // Adiciona o script de trigger
+            BossTriggerArea triggerScript = triggerObject.AddComponent<BossTriggerArea>();
+            triggerScript.SetBoss(this);
+            
+            triggerAreaObject = triggerObject.transform;
+        }
+        else
+        {
+            // Se já tem um objeto definido, garante que ele tem o script e o collider trigger
+            BossTriggerArea triggerScript = triggerAreaObject.GetComponent<BossTriggerArea>();
+            if (triggerScript == null)
+            {
+                triggerScript = triggerAreaObject.gameObject.AddComponent<BossTriggerArea>();
+                triggerScript.SetBoss(this);
+            }
+            
+            BoxCollider2D triggerCollider = triggerAreaObject.GetComponent<BoxCollider2D>();
+            if (triggerCollider == null)
+            {
+                triggerCollider = triggerAreaObject.gameObject.AddComponent<BoxCollider2D>();
+                triggerCollider.isTrigger = true;
+                triggerCollider.size = new Vector2(10f, 5f); // Tamanho padrão - ajuste conforme necessário
+            }
+            
+            // Garante que é um trigger
+            triggerCollider.isTrigger = true;
+        }
+    }
+    
+    // Método chamado quando o player entrar na área do trigger
+    public void ActivateBoss()
+    {
+        if (!bossActivated && !isDead)
+        {
+            bossActivated = true;
+            Debug.Log("Boss ativado! Começando o padrão de ataque.");
+            
+            // Inicia o padrão de ataque
+            attackPatternCoroutine = StartCoroutine(MovementPattern());
+        }
+    }
+    
+    // Sobrescreve o método EnemyHit da classe Enemy
+    public override void EnemyHit(float damageAmount)
+    {
+        Debug.Log($"ErevosBoss.EnemyHit chamado com dano: {damageAmount}");
+        
+        // Se estiver invulnerável ou em cooldown, ignora o dano
+        if (isInvulnerable || isTakingDamageCooldown || isDead)
+        {
+            Debug.Log($"Boss não tomou dano - Invulnerável: {isInvulnerable}, Cooldown: {isTakingDamageCooldown}, Morto: {isDead}");
+            return;
         }
         
-        if (vulnerableVisualEffect != null)
-            vulnerableVisualEffect.SetActive(false);
-            
-        // Inicia a rotina de ataque
-        StartCoroutine(AttackCycle());
+        // Aplica o dano
+        bossHealth -= damageAmount;
+        
+        // Inicia o cooldown para evitar dano múltiplo
+        StartCoroutine(DamageCooldown());
+        
+        // Efeito visual de dano (pisca vermelho)
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.red;
+            Invoke("ResetColor", 0.1f);
+        }
+        
+        Debug.Log($"Boss tomou {damageAmount} de dano. Vida: {bossHealth}/{maxBossHealth}");
+        
+        // Verifica se morreu
+        if (bossHealth <= 0 && !isDead)
+        {
+            Die();
+        }
+    }
+    
+    private void ResetColor()
+    {
+        if (spriteRenderer != null)
+            spriteRenderer.color = Color.white;
+    }
+    
+    private IEnumerator DamageCooldown()
+    {
+        isTakingDamageCooldown = true;
+        yield return new WaitForSeconds(0.2f);
+        isTakingDamageCooldown = false;
     }
     
     private void Update()
     {
-        if (isDead || isStunned)
-            return;
-            
-        // Verificar transição de fase
-        if (!isPhase2 && health <= maxHealth * phaseTransitionHealthPercent)
-        {
-            StartCoroutine(TransitionToPhase2());
-        }
-        
         // Atualiza movimento se estiver se movendo para um destino
-        if (isMoving && canMove)
+        if (isMoving && !isDead)
         {
             MoveTowardsDestination();
         }
@@ -106,14 +177,12 @@ public class ErevosBoss : MonoBehaviour
         if (distance <= distanceThreshold)
         {
             isMoving = false;
-            animator.SetBool("Walking", false);
             return;
         }
         
         // Normaliza a direção e move
         direction.Normalize();
-        float currentSpeed = isPhase2 ? runSpeed : walkSpeed;
-        transform.position += direction * currentSpeed * Time.deltaTime;
+        transform.position += direction * moveSpeed * Time.deltaTime;
         
         // Atualiza a escala para virar na direção correta
         if (direction.x > 0)
@@ -124,167 +193,63 @@ public class ErevosBoss : MonoBehaviour
         {
             transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
         }
-        
-        // Atualiza animação
-        animator.SetBool("Walking", true);
     }
     
-    private IEnumerator AttackCycle()
+    private IEnumerator MovementPattern()
     {
-        // Aguarda um pequeno tempo antes de iniciar os ataques
-        yield return new WaitForSeconds(1.5f);
-        
         while (!isDead)
         {
-            // Se estiver em movimento ou não puder atacar, pula
-            if (!canAttack || isStunned)
+            // Se estiver atacando, aguarda
+            if (isAttacking)
             {
                 yield return null;
                 continue;
             }
             
-            // Se puder atacar, escolhe um ataque baseado na fase
-            if (!isAttacking)
-            {
-                isAttacking = true;
-                
-                if (isPhase2)
-                {
-                    yield return StartCoroutine(Phase2AttackPattern());
-                }
-                else
-                {
-                    yield return StartCoroutine(Phase1AttackPattern());
-                }
-                
-                isAttacking = false;
-                
-                // Após um ciclo de ataques, torna o boss vulnerável
-                if (!isInvulnerable)
-                {
-                    yield return StartCoroutine(BecomeVulnerable(vulnerableDuration));
-                }
-            }
+            // Padrão de movimento e ataque
+            // Centro -> Esquerda -> Direita -> Centro
             
-            yield return null;
+            // Vai para o centro e ataca
+            yield return StartCoroutine(MoveTo(midPoint));
+            yield return StartCoroutine(PerformAttack(2));
+            
+            // Vai para a esquerda e ataca
+            yield return StartCoroutine(MoveTo(leftEdge));
+            yield return StartCoroutine(PerformAttack(3));
+            
+            // Vai para a direita e ataca
+            yield return StartCoroutine(MoveTo(rightEdge));
+            yield return StartCoroutine(PerformAttack(3));
+            
+            // Volta para o centro e ataca novamente
+            yield return StartCoroutine(MoveTo(midPoint));
+            yield return StartCoroutine(PerformAttack(2));
+            
+            // Torna-se vulnerável após o ciclo de ataques
+            yield return StartCoroutine(BecomeVulnerable(5f));
+            
+            // Pequena pausa entre ciclos
+            yield return new WaitForSeconds(1f);
         }
     }
     
-    private IEnumerator Phase1AttackPattern()
+    private IEnumerator MoveTo(Transform target)
     {
-        // Padrão de ataque da fase 1
-        yield return StartCoroutine(WalkTo(midPoint));
-        
-        // Realizar o ataque de bolas de fogo 2 vezes
-        for (int i = 0; i < 2; i++)
-        {
-            if (fireballAttack != null)
-            {
-                animator.SetTrigger("Attack");
-                yield return new WaitForSeconds(0.5f); // Tempo de animação antes de atirar
-                fireballAttack.FireLeafPatternAttack(1); // 1 rajada
-            }
-            yield return new WaitForSeconds(basicAttackCooldown);
-        }
-        
-        // Caminha para uma borda e ataca
-        yield return StartCoroutine(WalkTo(leftEdge));
-        
-        if (fireballAttack != null)
-        {
-            animator.SetTrigger("Attack");
-            yield return new WaitForSeconds(0.5f);
-            fireballAttack.FireLeafPatternAttack(1);
-        }
-        
-        yield return new WaitForSeconds(basicAttackCooldown);
-        
-        // Caminha para outra borda e ataca
-        yield return StartCoroutine(WalkTo(rightEdge));
-        
-        if (fireballAttack != null)
-        {
-            animator.SetTrigger("Attack");
-            yield return new WaitForSeconds(0.5f);
-            fireballAttack.FireLeafPatternAttack(1);
-        }
-    }
-    
-    private IEnumerator Phase2AttackPattern()
-    {
-        // Padrão de ataque mais intenso da fase 2
-        yield return StartCoroutine(WalkTo(midPoint));
-        
-        // Ataque especial de 3 rajadas
-        if (fireballAttack != null)
-        {
-            animator.SetTrigger("SpecialAttack");
-            yield return new WaitForSeconds(0.7f); // Tempo de preparação maior para ataque especial
-            fireballAttack.FireLeafPatternAttack(3); // 3 rajadas
-        }
-        
-        yield return new WaitForSeconds(specialAttackCooldown * 0.5f);
-        
-        // Patrulha mais rápido e ataca de ambos os lados
-        yield return StartCoroutine(WalkTo(leftEdge));
-        
-        if (fireballAttack != null)
-        {
-            animator.SetTrigger("Attack");
-            yield return new WaitForSeconds(0.4f);
-            fireballAttack.FireLeafPatternAttack(2); // 2 rajadas
-        }
-        
-        yield return new WaitForSeconds(basicAttackCooldown * 0.6f); // Cooldown reduzido na fase 2
-        
-        yield return StartCoroutine(WalkTo(rightEdge));
-        
-        if (fireballAttack != null)
-        {
-            animator.SetTrigger("Attack");
-            yield return new WaitForSeconds(0.4f);
-            fireballAttack.FireLeafPatternAttack(2);
-        }
-        
-        yield return new WaitForSeconds(basicAttackCooldown * 0.6f);
-        
-        // Retorna ao centro para um último ataque
-        yield return StartCoroutine(WalkTo(midPoint));
-        
-        if (fireballAttack != null)
-        {
-            animator.SetTrigger("Attack");
-            yield return new WaitForSeconds(0.5f);
-            fireballAttack.FireLeafPatternAttack(1);
-        }
-    }
-    
-    private IEnumerator WalkTo(Transform target)
-    {
-        // Se não puder mover, retorna imediatamente
-        if (!canMove) yield break;
-        
         // Define o destino e inicia o movimento
         currentDestination = new Vector3(target.position.x, transform.position.y, transform.position.z);
         isMoving = true;
         
-        // Aguarda até chegar ao destino ou ser interrompido
+        // Aguarda até chegar ao destino
         while (isMoving && Vector3.Distance(transform.position, currentDestination) > distanceThreshold)
         {
-            // Se o boss for atordoado ou morrer durante o movimento, interrompe
-            if (isStunned || isDead)
-            {
-                isMoving = false;
-                animator.SetBool("Walking", false);
+            if (isDead)
                 yield break;
-            }
-            
+                
             yield return null;
         }
         
         // Chegou ao destino, para de andar
         isMoving = false;
-        animator.SetBool("Walking", false);
         
         // Pequena pausa após chegar
         yield return new WaitForSeconds(0.3f);
@@ -304,201 +269,132 @@ public class ErevosBoss : MonoBehaviour
         }
     }
     
-    private IEnumerator TransitionToPhase2()
+    private IEnumerator PerformAttack(int numberOfFireballs)
     {
-        // Evita que a transição seja chamada várias vezes
-        isPhase2 = true;
+        isAttacking = true;
         
-        // Pausa os ataques e torna invulnerável durante a transição
-        canAttack = false;
-        isInvulnerable = true;
-        canMove = false;
-        isMoving = false;
-        isStunned = true;
+        // Adiciona um pouco de tempo antes do ataque
+        yield return new WaitForSeconds(0.2f);
         
-        // Para qualquer movimento
-        animator.SetBool("Walking", false);
-        
-        // Vai para o centro
-        yield return StartCoroutine(WalkTo(midPoint));
-        
-        // Animação de transição de fase
-        animator.SetTrigger("PhaseChange");
-        
-        // Efeito visual da transição
-        if (phaseTransitionEffect != null)
+        // Dispara o número especificado de bolas de fogo
+        for (int i = 0; i < numberOfFireballs; i++)
         {
-            GameObject effect = Instantiate(phaseTransitionEffect, transform.position, Quaternion.identity);
-            Destroy(effect, 2.5f);
+            if (isDead)
+                yield break;
+                
+            // Dispara uma animação de ataque
+            animator.SetTrigger("Attack");
+            
+            // Espera o tempo da animação antes de disparar
+            yield return new WaitForSeconds(0.5f);
+            
+            // Dispara a bola de fogo
+            if (fireballAttack != null)
+            {
+                fireballAttack.FireLeafPatternAttack(1);
+            }
+            
+            // Cooldown entre bolas de fogo
+            if (i < numberOfFireballs - 1)
+            {
+                yield return new WaitForSeconds(attackCooldown);
+            }
         }
         
-        // Aguarda a conclusão da animação
-        yield return new WaitForSeconds(3f);
+        // Tempo de espera após a sequência de ataques
+        yield return new WaitForSeconds(1f);
         
-        // Continua com os ataques
-        canAttack = true;
-        canMove = true;
-        isStunned = false;
+        isAttacking = false;
     }
     
     private IEnumerator BecomeVulnerable(float duration)
     {
+        // Torna o boss vulnerável
         isInvulnerable = false;
-        isTakingDamageCooldown = false;
-        isStunned = true;
         
-        // Para o movimento
-        isMoving = false;
-        canMove = false;
-        animator.SetBool("Walking", false);
+        // Inicia o efeito de piscar para indicar vulnerabilidade
+        StartCoroutine(BlinkEffect(duration));
         
-        // Animação de atordoado
-        animator.SetTrigger("Stunned");
+        Debug.Log("Boss está vulnerável por " + duration + " segundos");
         
-        // Ativa efeito visual de vulnerabilidade
-        if (vulnerableVisualEffect != null)
-            vulnerableVisualEffect.SetActive(true);
-            
         yield return new WaitForSeconds(duration);
         
-        // Remove estado de vulnerabilidade
+        // Volta a ser invulnerável
         isInvulnerable = true;
-        isStunned = false;
-        canMove = true;
         
-        // Desativa efeito visual
-        if (vulnerableVisualEffect != null)
-            vulnerableVisualEffect.SetActive(false);
-            
-        // Retorna ao estado idle
-        animator.SetTrigger("RecoverFromStun");
+        Debug.Log("Boss não está mais vulnerável");
     }
     
-    // Método para receber dano
-    public void TakeDamage(float damageAmount)
+    private IEnumerator BlinkEffect(float duration)
     {
-        if (isInvulnerable || isTakingDamageCooldown || isDead)
-            return;
-            
-        StartCoroutine(DamageCooldownRoutine(damageAmount));
-    }
-    
-    private IEnumerator DamageCooldownRoutine(float damageAmount)
-    {
-        isTakingDamageCooldown = true;
+        float endTime = Time.time + duration;
         
-        // Aplica o dano
-        health -= damageAmount;
-        
-        // Efeito visual de dano
-        animator.SetTrigger("TakeDamage");
-        
-        // Efeito de impacto
-        if (hitEffect != null)
+        while (Time.time < endTime && !isDead)
         {
-            GameObject effect = Instantiate(hitEffect, transform.position, Quaternion.identity);
-            Destroy(effect, 1f);
+            if (spriteRenderer != null)
+                spriteRenderer.enabled = !spriteRenderer.enabled;
+                
+            yield return new WaitForSeconds(0.1f);
         }
         
-        // Debug de dano
-        Debug.Log("Erevos Boss took " + damageAmount + " damage. Health: " + health);
-        
-        // Verifica morte
-        if (health <= 0 && !isDead)
-        {
-            Die();
-            yield break;
-        }
-        
-        // Tempo de cooldown entre danos
-        yield return new WaitForSeconds(0.5f);
-        isTakingDamageCooldown = false;
+        // Garante que o sprite fique visível no final
+        if (spriteRenderer != null)
+            spriteRenderer.enabled = true;
     }
     
     private void Die()
     {
         isDead = true;
-        isStunned = true;
         isInvulnerable = true;
-        canMove = false;
+        isAttacking = false;
         isMoving = false;
         
-        // Para o movimento
-        animator.SetBool("Walking", false);
+        Debug.Log("Boss morreu!");
         
-        // Cancela qualquer coroutine ativa
-        StopAllCoroutines();
-        
-        // Animação de morte
-        animator.SetTrigger("Death");
-        
-        // Adiciona recompensa monetária
-        if (moneyManager != null)
-        {
-            moneyManager.UpdateMoney(goldReward);
-        }
-        
-        // Cria efeito de morte
-        if (deathEffect != null)
-        {
-            GameObject effect = Instantiate(deathEffect, transform.position, Quaternion.identity);
-            Destroy(effect, 3f);
-        }
-        
-        // Desativa componentes de colisão
+        // Desativa os colliders
         Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
         foreach (Collider2D col in colliders)
         {
             col.enabled = false;
         }
         
-        // Destroi o boss após a animação de morte
-        StartCoroutine(DestroyAfterDelay(3f));
-    }
-    
-    private IEnumerator DestroyAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
+        // Destrói o GameObject imediatamente
         Destroy(gameObject);
     }
     
-    // Método para atacar o jogador em caso de colisão
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        if (other.CompareTag("Player") && !isDead && !isStunned)
-        {
-            PlayerController player = other.GetComponent<PlayerController>();
-            if (player != null && !player.pState.invincible && !player.isDead)
-            {
-                float distanceToPlayer = Vector2.Distance(transform.position, player.transform.position);
-                if (distanceToPlayer < closeRangeDistance)
-                {
-                    player.TakeDamage(damage);
-                }
-            }
-        }
-    }
-    
-    // Método público para forçar imediatamente um ataque (útil para eventos)
+    // Método público para forçar um ataque imediato (útil para eventos)
     public void ForceAttack(int rajadas = 1)
     {
-        if (fireballAttack != null && !isDead && !isStunned)
+        if (fireballAttack != null && !isAttacking && !isDead)
         {
-            animator.SetTrigger("Attack");
-            StartCoroutine(DelayedFireballAttack(rajadas, 0.5f));
+            StartCoroutine(PerformAttack(rajadas));
         }
     }
+}
+
+// Classe de trigger que ativa o boss quando o player entra na área
+public class BossTriggerArea : MonoBehaviour
+{
+    private ErevosBoss boss;
+    private bool triggered = false;
     
-    private IEnumerator DelayedFireballAttack(int rajadas, float delay)
+    public void SetBoss(ErevosBoss targetBoss)
     {
-        yield return new WaitForSeconds(delay);
-        if (fireballAttack != null)
-        {
-            fireballAttack.FireLeafPatternAttack(rajadas);
-        }
+        boss = targetBoss;
     }
     
-    // Getters públicos para saúde
-    public float CurrentHealth => health;
-    public float MaxHealth => maxHealth;
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!triggered && other.CompareTag("Player"))
+        {
+            triggered = true;
+            
+            if (boss != null)
+            {
+                boss.ActivateBoss();
+            }
+            
+            Debug.Log("Player entrou na área do boss!");
+        }
+    }
 }
